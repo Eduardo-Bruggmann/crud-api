@@ -2,15 +2,15 @@ import { z } from "zod";
 
 const usernameField = z
   .string()
-  .min(3, "Username curto demais")
-  .max(20, "Username longo demais");
+  .min(3, "Username too short")
+  .max(20, "Username too long");
 
-const emailField = z.email("Email inválido");
+const emailField = z.email("Invalid email format").max(255, "Email too long");
 
 const passwordField = z
   .string()
-  .min(6, "Senha muito curta")
-  .max(32, "Senha muito longa");
+  .min(6, "Password too short")
+  .max(32, "Password too long");
 
 const privacyField = z.boolean();
 
@@ -36,7 +36,7 @@ export const loginUserSchema = z
     password: passwordField,
   })
   .refine((data) => data.email || data.username, {
-    message: "É necessário fornecer email ou username",
+    message: "Email or username is required",
   });
 
 export const updateUserSchema = z.object({

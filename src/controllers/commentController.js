@@ -26,6 +26,7 @@ export const createComment = async (req, res) => {
     const msg = getZodErrorMessage(err);
     if (msg) return res.status(400).json({ message: msg });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -42,6 +43,7 @@ export const getComment = async (req, res) => {
     res.status(200).json(comment);
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -70,6 +72,7 @@ export const getAllComments = async (req, res) => {
     });
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -87,6 +90,7 @@ export const deleteComment = async (req, res) => {
     res.status(200).json({ message: "Comment deleted successfully" });
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };

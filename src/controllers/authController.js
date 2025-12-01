@@ -62,6 +62,7 @@ export const registerUser = async (req, res) => {
     const msg = getZodErrorMessage(err);
     if (msg) return res.status(400).json({ message: msg });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -104,6 +105,7 @@ export const loginUser = async (req, res) => {
     const msg = getZodErrorMessage(err);
     if (msg) return res.status(400).json({ message: msg });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -120,6 +122,7 @@ export const logoutUser = async (req, res) => {
     res.json({ message: "Logout successful" });
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -150,6 +153,7 @@ export const refreshToken = async (req, res) => {
       .json({ accessToken: newAccess });
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };

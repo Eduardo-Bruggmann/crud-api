@@ -12,6 +12,6 @@ export const authLimiter = rateLimit({
 
 export const generalLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 50,
+  max: 60,
   message: "Too many requests, please try again later",
 });

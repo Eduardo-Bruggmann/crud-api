@@ -55,6 +55,7 @@ export const createUser = async (req, res) => {
     const msg = getZodErrorMessage(err);
     if (msg) return res.status(400).json({ message: msg });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -78,6 +79,7 @@ export const getUser = async (req, res) => {
     });
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -101,6 +103,7 @@ export const getAllUsers = async (req, res) => {
     });
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -140,6 +143,7 @@ export const updateUser = async (req, res) => {
     const msg = getZodErrorMessage(err);
     if (msg) return res.status(400).json({ message: msg });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -165,6 +169,7 @@ export const deleteUser = async (req, res) => {
     if (appErr)
       return res.status(appErr.status).json({ message: appErr.message });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };

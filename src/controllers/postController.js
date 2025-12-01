@@ -21,6 +21,7 @@ export const createPost = async (req, res) => {
     const msg = getZodErrorMessage(err);
     if (msg) return res.status(400).json({ message: msg });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -33,6 +34,7 @@ export const getPost = async (req, res) => {
     res.json(post);
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -56,6 +58,7 @@ export const getAllPosts = async (req, res) => {
     });
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -76,6 +79,7 @@ export const updatePost = async (req, res) => {
     const msg = getZodErrorMessage(err);
     if (msg) return res.status(400).json({ message: msg });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -95,6 +99,7 @@ export const deletePost = async (req, res) => {
     if (appErr)
       return res.status(appErr.status).json({ message: appErr.message });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };

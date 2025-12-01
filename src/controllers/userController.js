@@ -114,6 +114,7 @@ export const deleteUser = async (req, res) => {
     if (appErr)
       return res.status(appErr.status).json({ message: appErr.message });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };

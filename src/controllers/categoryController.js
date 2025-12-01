@@ -29,6 +29,7 @@ export const createCategory = async (req, res) => {
     const msg = getZodErrorMessage(err);
     if (msg) return res.status(400).json({ message: msg });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -43,6 +44,7 @@ export const getCategory = async (req, res) => {
     res.status(200).json(category);
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -69,6 +71,7 @@ export const getAllCategories = async (req, res) => {
     });
   } catch (err) {
     logger.error(err);
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -91,6 +94,7 @@ export const updateCategory = async (req, res) => {
     const msg = getZodErrorMessage(err);
     if (msg) return res.status(400).json({ message: msg });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -113,6 +117,7 @@ export const deleteCategory = async (req, res) => {
     if (appErr)
       return res.status(appErr.status).json({ message: appErr.message });
 
+    console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
