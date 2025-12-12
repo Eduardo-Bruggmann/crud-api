@@ -1,0 +1,182 @@
+{
+	"info": {
+		"_postman_id": "2d6206ce-7930-4a13-a83a-e7b6b48ff19e",
+		"name": "post",
+		"description": "Endpoints for creating, retrieving, updating, and deleting posts.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38437231",
+		"_collection_link": "https://www.postman.com/e-bruggmann/workspace/4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-2d6206ce-7930-4a13-a83a-e7b6b48ff19e?action=share&source=collection_link&creator=38437231"
+	},
+	"item": [
+		{
+			"name": "registerPost",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Post Title\",\r\n    \"content\": \"This is where the content of your post should go.\",\r\n    \"authorId\": \"insert-an-user-id-here\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{post}}",
+					"host": [
+						"{{post}}"
+					]
+				},
+				"description": "Creates a new post with its title, content, and category preferences. Requires authentication."
+			},
+			"response": []
+		},
+		{
+			"name": "getPost",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{post}}/insert_a_post_id_here",
+					"host": [
+						"{{post}}"
+					],
+					"path": [
+						"insert_a_post_id_here"
+					]
+				},
+				"description": "Returns the full details of a specific post using its ID."
+			},
+			"response": []
+		},
+		{
+			"name": "getPostByTitle",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{post}}/title/insert_a_post_title_here",
+					"host": [
+						"{{post}}"
+					],
+					"path": [
+						"title",
+						"insert_a_post_title_here"
+					]
+				},
+				"description": "Fetches a post by its title. Useful when titles are unique identifiers or search keys."
+			},
+			"response": []
+		},
+		{
+			"name": "listPosts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{post}}",
+					"host": [
+						"{{post}}"
+					]
+				},
+				"description": "Lists all posts available in the system. Supports both public visibility and user-specific access rules."
+			},
+			"response": []
+		},
+		{
+			"name": "listPostsByCategoryName",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{post}}/category/insert_a_category_name_here",
+					"host": [
+						"{{post}}"
+					],
+					"path": [
+						"category",
+						"insert_a_category_name_here"
+					]
+				},
+				"description": "Returns every post associated with a given category name."
+			},
+			"response": []
+		},
+		{
+			"name": "updatePost",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"New Post Title\"\r\n    // \"content\": \"This is where the new content of your post should go.\"\r\n    // \"categoryId\": \"insert-a-category-id-here\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{post}}/insert_a_post_id_here",
+					"host": [
+						"{{post}}"
+					],
+					"path": [
+						"insert_a_post_id_here"
+					]
+				},
+				"description": "Updates fields of an existing post. Only the post owner or an admin can perform this action."
+			},
+			"response": []
+		},
+		{
+			"name": "deletePost",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{post}}/insert_a_post_id_here",
+					"host": [
+						"{{post}}"
+					],
+					"path": [
+						"insert_a_post_id_here"
+					]
+				},
+				"description": "Permanently removes a post from the system."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "post",
+			"value": ""
+		}
+	]
+}

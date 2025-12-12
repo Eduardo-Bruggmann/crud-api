@@ -31,7 +31,3 @@ Simple REST API for user management with CRUD.
 
 - npx prisma migrate deploy
 - npx prisma generate
-
-## Postman Workspace
-
-https://app.getpostman.com/join-team?invite_code=245bc1377a6507e04f8e24b7f22e33d4d96e56105805a1ed9aaa5743dd5e60c5&target_code=06f1b71cbb97950ceca8676a8f2f3e8e

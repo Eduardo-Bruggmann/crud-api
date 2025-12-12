@@ -1,0 +1,148 @@
+{
+	"info": {
+		"_postman_id": "969b8bdf-2f6a-4a76-8323-35afe92169ad",
+		"name": "admin",
+		"description": "Endpoints for admin-level user management and operations.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38437231",
+		"_collection_link": "https://www.postman.com/e-bruggmann/workspace/4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-969b8bdf-2f6a-4a76-8323-35afe92169ad?action=share&source=collection_link&creator=38437231"
+	},
+	"item": [
+		{
+			"name": "registerUser",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"Mock\",\r\n    \"email\": \"mock@email.com\",\r\n    \"password\": \"mock123\",\r\n    \"isPrivate\": false,\r\n    \"isAdmin\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{admin}}",
+					"host": [
+						"{{admin}}"
+					]
+				},
+				"description": "Creates a new user with elevated permissions."
+			},
+			"response": []
+		},
+		{
+			"name": "getUser",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{admin}}/insert_an_user_id_here",
+					"host": [
+						"{{admin}}"
+					],
+					"path": [
+						"insert_an_user_id_here"
+					]
+				},
+				"description": "Retrieves detailed information about a specific user by ID."
+			},
+			"response": []
+		},
+		{
+			"name": "listUsers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{admin}}",
+					"host": [
+						"{{admin}}"
+					]
+				},
+				"description": "Returns a paginated list of all registered users."
+			},
+			"response": []
+		},
+		{
+			"name": "updateUser",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"New Mock\"\r\n    // \"email\": \"newmock@email.com\"\r\n    // \"isPrivate\": true\r\n    // \"isAdmin\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{admin}}/insert_an_user_id_here",
+					"host": [
+						"{{admin}}"
+					],
+					"path": [
+						"insert_an_user_id_here"
+					]
+				},
+				"description": "Updates selected fields of an existing user."
+			},
+			"response": []
+		},
+		{
+			"name": "deleteUser",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{admin}}/insert_an_user_id_here",
+					"host": [
+						"{{admin}}"
+					],
+					"path": [
+						"insert_an_user_id_here"
+					]
+				},
+				"description": "Soft-deletes a user account, disabling access without permanently removing the record from the database."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "admin",
+			"value": ""
+		}
+	]
+}

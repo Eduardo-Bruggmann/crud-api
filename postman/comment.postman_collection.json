@@ -1,0 +1,104 @@
+{
+	"info": {
+		"_postman_id": "e8bbd45f-38e8-4712-8076-66d7ff5e0666",
+		"name": "comment",
+		"description": "Endpoints for creating, listing, and deleting comments.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38437231",
+		"_collection_link": "https://www.postman.com/e-bruggmann/workspace/4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-e8bbd45f-38e8-4712-8076-66d7ff5e0666?action=share&source=collection_link&creator=38437231"
+	},
+	"item": [
+		{
+			"name": "registerComment",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"content\": \"This is where the content of your comment should go.\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}/posts/insert_a_post_id_here/comments",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"posts",
+						"insert_a_post_id_here",
+						"comments"
+					]
+				},
+				"description": "Creates a new comment associated with a specific post. Requires valid user authentication and a target post ID."
+			},
+			"response": []
+		},
+		{
+			"name": "listCommentsByPost",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}/posts/insert_a_post_id_here/comments",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"posts",
+						"insert_a_post_id_here",
+						"comments"
+					]
+				},
+				"description": "Retrieves all comments linked to a specific post. Useful for displaying discussions or comment threads."
+			},
+			"response": []
+		},
+		{
+			"name": "deleteComment",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}/comments/insert_a_comment_id_here",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"comments",
+						"insert_a_comment_id_here"
+					]
+				},
+				"description": "Permanently removes a comment from the system, making it inaccessible and fully deleted from the database."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
