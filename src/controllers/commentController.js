@@ -1,63 +1,48 @@
 import * as commentService from "../services/commentService.js";
-import { commentSchema } from "../schemas/commentSchema.js";
-import { logger } from "../utils/logger.js";
-import { getZodErrorMessage } from "../utils/errorUtils.js";
+import { errorHandler } from "../utils/error/errorHandler.js";
 
-const {
-  insertComment,
-  findCommentById,
-  listCommentsByPost,
-  deleteCommentById,
-} = commentService;
+const { createComment, getCommentById, getCommentsByPost, removeCommentById } =
+  commentService;
 
-export const createComment = async (req, res) => {
+export const registerComment = async (req, res) => {
   try {
-    const { id: postId } = req.params;
-    const payload = commentSchema.parse(req.body);
-    const newComment = await insertComment({
-      ...payload,
-      postId: parseInt(postId, 10),
+    const postId = parseInt(req.params.postId, 10);
+    const payload = {
+      ...req.body,
       authorId: req.user.id,
-    });
-    res.status(201).json(newComment);
+      postId,
+    };
+
+    const comment = await createComment(payload);
+    res.status(201).json(comment);
   } catch (err) {
-    logger.error(err);
-
-    const msg = getZodErrorMessage(err);
-    if (msg) return res.status(400).json({ message: msg });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const getComment = async (req, res) => {
   try {
-    const { commentId } = req.params;
+    const commentId = parseInt(req.params.commentId, 10);
 
-    const comment = await findCommentById(parseInt(commentId, 10));
-    if (!comment) {
-      return res.status(404).json({ message: "Comment not found" });
-    }
+    const comment = await getCommentById(commentId);
 
     res.status(200).json(comment);
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
-export const getAllComments = async (req, res) => {
+export const listCommentsByPost = async (req, res) => {
   try {
-    const { id: postId } = req.params;
+    const postId = parseInt(req.params.postId, 10);
+
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;
     const search = req.query.search || "";
     const skip = (page - 1) * limit;
 
-    const { items, total } = await listCommentsByPost(
-      parseInt(postId, 10),
+    const { items, total } = await getCommentsByPost(
+      postId,
       skip,
       limit,
       search
@@ -71,26 +56,17 @@ export const getAllComments = async (req, res) => {
       comments: items,
     });
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const deleteComment = async (req, res) => {
   try {
-    const { commentId } = req.params;
+    const commentId = parseInt(req.params.commentId, 10);
 
-    const existingComment = await findCommentById(parseInt(commentId, 10));
-
-    if (!existingComment)
-      return res.status(404).json({ message: "Comment not found" });
-
-    await deleteCommentById(parseInt(commentId, 10));
-    res.status(200).json({ message: "Comment deleted successfully" });
+    await removeCommentById(commentId);
+    res.status(204).send();
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };

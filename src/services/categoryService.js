@@ -1,56 +1,62 @@
-import { PrismaClient } from "@prisma/client";
+import * as categoryRepository from "../repositories/categoryRepository.js";
+import { categorySchema } from "../schemas/categorySchema.js";
+import { postCount } from "../repositories/postRepository.js";
+import { AppError } from "../utils/error/AppError.js";
 
-const prisma = new PrismaClient();
+const {
+  insertCategory,
+  findCategoryByName,
+  findCategoryById,
+  listCategories,
+  updateCategoryById,
+  deleteCategoryById,
+} = categoryRepository;
 
-const buildSearchFilter = (search) => {
-  const query = (search || "").trim();
-  if (!query) return {};
-  return {
-    OR: [{ name: { contains: query } }],
-  };
+export const createCategory = async (payload) => {
+  const category = categorySchema.parse(payload);
+
+  const exits = await findCategoryByName(category.name);
+
+  if (exits) throw new AppError("Category already exists", 409);
+
+  return await insertCategory(category);
 };
 
-export const insertCategory = (data) => prisma.category.create({ data });
+export const getCategoryByName = async (name) => {
+  const category = await findCategoryByName(name);
 
-export const findCategoryByName = (name) =>
-  prisma.category.findUnique({ where: { name } });
+  if (!category) throw new AppError("Category not found", 404);
 
-export const findCategoryById = (id) =>
-  prisma.category.findUnique({ where: { id } });
+  return category;
+};
 
-export const listCategories = async (skip = 0, take = 20, search = "") => {
-  const where = buildSearchFilter(search);
+export const getCategoryById = async (id) => {
+  const category = await findCategoryById(id);
 
-  const [items, total] = await Promise.all([
-    prisma.category.findMany({
-      skip,
-      take,
-      where,
-      select: {
-        id: true,
-        name: true,
-      },
-      orderBy: { name: "asc" },
-    }),
-    prisma.category.count({ where }),
-  ]);
+  if (!category) throw new AppError("Category not found", 404);
+
+  return category;
+};
+
+export const getCategories = async (skip, take, search) => {
+  const { items, total } = await listCategories(skip, take, search);
 
   return { items, total };
 };
 
-export const updateCategoryById = (id, data) =>
-  prisma.category.update({
-    where: { id },
-    data,
-  });
+export const editCategoryById = async (id, data) => {
+  await getCategoryById(id);
 
-export const deleteCategoryById = async (id) => {
-  const postCount = await prisma.post.count({ where: { categoryId: id } });
-  if (postCount > 0) {
+  const updatedData = categorySchema.parse(data);
+
+  return await updateCategoryById(id, updatedData);
+};
+
+export const removeCategoryById = async (id) => {
+  await getCategoryById(id);
+
+  if ((await postCount({ categoryId: id })) > 0)
     throw new AppError("Category has posts and cannot be deleted", 409);
-  }
 
-  await prisma.category.delete({
-    where: { id },
-  });
+  return await deleteCategoryById(id);
 };

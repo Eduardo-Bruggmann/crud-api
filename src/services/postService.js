@@ -1,102 +1,85 @@
-import { PrismaClient } from "@prisma/client";
+import * as postRepository from "../repositories/postRepository.js";
+import { findCategoryByName } from "../repositories/categoryRepository.js";
+import { createPostSchema, updatePostSchema } from "../schemas/postSchema.js";
+import { commentCount } from "../repositories/commentRepository.js";
+import { AppError } from "../utils/error/AppError.js";
 
-const prisma = new PrismaClient();
+const {
+  insertPost,
+  findPostById,
+  findPostByTitle,
+  listPosts,
+  listPostsByCategoryName,
+  updatePostById,
+  deletePostById,
+} = postRepository;
 
-const buildSearchFilter = (search) => {
-  const query = (search || "").trim();
-  if (!query) return {};
-  return {
-    OR: [{ title: { contains: query } }, { content: { contains: query } }],
-  };
+export const createPost = async (payload) => {
+  const data = createPostSchema.parse(payload);
+
+  const exists = await findPostByTitle(data.title);
+
+  if (exists) throw new AppError("Post with this title already exists", 409);
+
+  return await insertPost(data);
 };
 
-export const insertPost = (data) => prisma.post.create({ data });
+export const getPostById = (id) => {
+  const post = findPostById(id);
 
-export const findPostById = (id) => prisma.post.findUnique({ where: { id } });
+  if (!post) throw new AppError("Post not found", 404);
 
-export const listPosts = async (skip = 0, take = 20, search = "") => {
-  const where = buildSearchFilter(search);
+  return post;
+};
 
-  const [items, total] = await Promise.all([
-    prisma.post.findMany({
-      skip,
-      take,
-      where,
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        createdAt: true,
-        updatedAt: true,
-        authorId: true,
-        categoryId: true,
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.post.count({ where }),
-  ]);
+export const getPostByTitle = (title) => {
+  const post = findPostByTitle(title);
+
+  if (!post) throw new AppError("Post not found", 404);
+
+  return post;
+};
+
+export const getPosts = async (skip, take, search) => {
+  const { items, total } = await listPosts(skip, take, search);
 
   return { items, total };
 };
 
-export const listPostsByCategoryName = async (
+export const getPostsByCategoryName = async (
   categoryName,
-  skip = 0,
-  take = 20,
-  search = ""
+  skip,
+  take,
+  search
 ) => {
-  const category = await prisma.category.findUnique({
-    where: { name: categoryName },
-    select: { id: true },
-  });
+  const category = await findCategoryByName(categoryName);
 
-  if (!category) {
-    return { items: [], total: 0 };
-  }
+  if (!category) throw new AppError("Category not found", 404);
 
-  const where = {
-    ...buildSearchFilter(search),
-    categoryId: category.id,
-  };
-
-  const [items, total] = await Promise.all([
-    prisma.post.findMany({
-      skip,
-      take,
-      where,
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        createdAt: true,
-        updatedAt: true,
-        authorId: true,
-        categoryId: true,
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.post.count({ where }),
-  ]);
+  const { items, total } = await listPostsByCategoryName(
+    categoryName,
+    skip,
+    take,
+    search
+  );
 
   return { items, total };
 };
 
-export const updatePostById = (id, data) =>
-  prisma.post.update({
-    where: { id },
-    data,
-  });
+export const editPostById = async (id, payload) => {
+  await getPostById(id);
 
-export const deletePostById = async (id) => {
-  const commentsCount = await prisma.comment.count({
-    where: { postId: id },
-  });
+  const updateData = updatePostSchema.parse(payload);
 
-  if (commentsCount > 0) {
+  return await updatePostById(id, updateData);
+};
+
+export const removePostById = async (id) => {
+  await getPostById(id);
+
+  if (commentCount({ postId: id }) > 0) {
     throw new AppError("Post has comments and cannot be deleted", 409);
   }
 
-  await prisma.post.delete({
-    where: { id },
-  });
+  return await deletePostById(id);
 };

@@ -1,90 +1,42 @@
-import bcrypt from "bcryptjs";
 import * as userService from "../services/userService.js";
-import {
-  registerUserByAdminSchema,
-  updateUserSchema,
-} from "../schemas/userSchema.js";
+import { errorHandler } from "../utils/error/errorHandler.js";
 import { logger } from "../utils/logger.js";
-import { getZodErrorMessage } from "../utils/errorUtils.js";
-import { parseAppError } from "../utils/errorUtils.js";
 
 const {
-  insertUser,
-  findUserByEmailOrUsername,
-  findUserById,
-  listUsers,
-  updateUserById,
-  deleteUserById,
+  createUserByAdmin,
+  getUserById,
+  getUsers,
+  editUserByIdAsAdmin,
+  removeUserById,
 } = userService;
 
-export const createUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
-    const payload = registerUserByAdminSchema.parse(req.body);
+    const payload = req.body;
 
-    const exists = await findUserByEmailOrUsername(
-      payload.email,
-      payload.username
-    );
-
-    if (exists) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    const hash = await bcrypt.hash(payload.password, 10);
-
-    const user = await insertUser({
-      username: payload.username,
-      email: payload.email,
-      password: hash,
-      isAdmin: payload.isAdmin ?? false,
-      isPrivate: payload.isPrivate ?? false,
-    });
+    const user = await createUserByAdmin(payload);
 
     logger.info(`User created: ${user.email}`);
 
-    res.status(201).json({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      isPrivate: user.isPrivate,
-    });
+    res.status(201).json({ message: "User created successfully" });
   } catch (err) {
-    logger.error(err);
-
-    const msg = getZodErrorMessage(err);
-    if (msg) return res.status(400).json({ message: msg });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const getUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id;
 
-    const user = await findUserById(id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const user = await getUserById(id);
 
-    res.json({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      isPrivate: user.isPrivate,
-      avatar: user.avatar,
-    });
+    res.status(200).json(user);
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
-export const getAllUsers = async (req, res) => {
+export const listUsers = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;
@@ -92,9 +44,9 @@ export const getAllUsers = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const { items, total } = await listUsers(skip, limit, search);
+    const { items, total } = await getUsers(skip, limit, search);
 
-    res.json({
+    res.status(200).json({
       page,
       limit,
       total,
@@ -102,74 +54,38 @@ export const getAllUsers = async (req, res) => {
       users: items,
     });
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const updateUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id;
 
-    const payload = updateUserSchema.parse(req.body);
-    const user = await findUserById(id);
+    const payload = req.body;
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    await getUserById(id);
 
-    const dataToUpdate = { ...payload };
+    const updated = await editUserByIdAsAdmin(id, payload);
 
-    if (payload.password && id !== req.user.id) {
-      return res
-        .status(400)
-        .json({ message: "Admins cannot change users' passwords" });
-    }
-
-    const updated = await updateUserById(id, dataToUpdate);
-
-    res.json({
-      id: updated.id,
-      username: updated.username,
-      email: updated.email,
-      isAdmin: updated.isAdmin,
-      isPrivate: updated.isPrivate,
-      avatar: updated.avatar,
-    });
+    res.status(200).json(updated);
   } catch (err) {
-    logger.error(err);
-
-    const msg = getZodErrorMessage(err);
-    if (msg) return res.status(400).json({ message: msg });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const deleteUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id;
 
-    const user = await findUserById(id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    await getUserById(id);
 
-    await deleteUserById(id);
+    await removeUserById(id);
 
     logger.warn(`User soft-deleted: id=${id}`);
 
-    res.json({ message: "User deleted successfully" });
+    res.status(204).send();
   } catch (err) {
-    logger.error(err);
-
-    const appErr = parseAppError(err);
-    if (appErr)
-      return res.status(appErr.status).json({ message: appErr.message });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };

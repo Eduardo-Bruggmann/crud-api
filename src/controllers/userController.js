@@ -1,29 +1,27 @@
-import bcrypt from "bcryptjs";
 import * as userService from "../services/userService.js";
-import { updateUserSchema } from "../schemas/userSchema.js";
+import { errorHandler } from "../utils/error/errorHandler.js";
 import { logger } from "../utils/logger.js";
-import { getZodErrorMessage, parseAppError } from "../utils/errorUtils.js";
 
-const { findUserById, updateUserById, deleteUserById, listPublicUsers } =
-  userService;
+const {
+  getUserById,
+  getPublicUsers,
+  editUserById,
+  removeUserById,
+  generateResetPasswordCode,
+  resetPasswordWithCode,
+} = userService;
 
 export const getUser = async (req, res) => {
   try {
-    const user = await findUserById(req.user.id);
+    const user = await getUserById(req.user.id);
 
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const payload = { ...user };
-    delete payload.password;
-
-    res.json({ payload });
+    res.status(200).json(user);
   } catch (err) {
-    logger.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
-export const getAllUsers = async (req, res) => {
+export const listPublicUsers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -31,9 +29,9 @@ export const getAllUsers = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const { items, total } = await listPublicUsers(skip, limit, search);
+    const { items, total } = await getPublicUsers(skip, limit, search);
 
-    res.json({
+    res.status(200).json({
       page,
       limit,
       total,
@@ -41,80 +39,56 @@ export const getAllUsers = async (req, res) => {
       users: items,
     });
   } catch (err) {
-    logger.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const updateUser = async (req, res) => {
   try {
     const id = req.user.id;
-    const payload = updateUserSchema.parse(req.body);
+    const payload = req.body;
 
-    const user = await findUserById(id);
+    const updated = await editUserById(id, payload);
 
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const needsCurrentPassword = Boolean(payload.email || payload.password);
-
-    if (needsCurrentPassword && !payload.currentPassword) {
-      return res.status(400).json({
-        message: "Current password is required to change email or password",
-      });
-    }
-
-    if (payload.currentPassword) {
-      const match = await bcrypt.compare(
-        payload.currentPassword,
-        user.password
-      );
-      if (!match) {
-        return res
-          .status(400)
-          .json({ message: "Current password is incorrect" });
-      }
-    }
-
-    const data = { ...payload };
-    delete data.currentPassword;
-
-    if (payload.password) {
-      data.password = await bcrypt.hash(payload.password, 10);
-    }
-
-    const updated = await updateUserById(id, data);
-
-    delete updated.password;
-    res.json({ updated });
+    res.status(200).json(updated);
   } catch (err) {
-    logger.error(err);
-
-    const msg = getZodErrorMessage(err);
-    if (msg) return res.status(400).json({ message: msg });
-
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const deleteUser = async (req, res) => {
   try {
-    const user = await findUserById(req.user.id);
+    const id = req.user.id;
+    await removeUserById(id);
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+    logger.warn(`User soft-deleted: id=${id}`);
 
-    await deleteUserById(req.user.id);
-
-    logger.warn(`User soft-deleted: id=${req.user.id}`);
-
-    res.json({ message: "User deleted successfully" });
+    res.status(204).send();
   } catch (err) {
-    logger.error(err);
+    return errorHandler(err, res);
+  }
+};
 
-    const appErr = parseAppError(err);
-    if (appErr)
-      return res.status(appErr.status).json({ message: appErr.message });
+export const requestPasswordReset = async (req, res) => {
+  try {
+    const email = req.body.email;
 
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    await generateResetPasswordCode(email);
+
+    res.status(200).json({ message: "Reset code sent" });
+  } catch (err) {
+    return errorHandler(err, res);
+  }
+};
+
+export const confirmPasswordReset = async (req, res) => {
+  try {
+    const payload = req.body;
+
+    await resetPasswordWithCode(payload);
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    return errorHandler(err, res);
   }
 };

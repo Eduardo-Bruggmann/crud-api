@@ -1,20 +1,22 @@
-import express from "express";
-import { protect, adminOnly } from "../middlewares/auth.js";
 import * as category from "../controllers/categoryController.js";
+import { protect, adminOnly } from "../middlewares/auth.js";
+import express from "express";
 
 const {
-  createCategory,
+  registerCategory,
   getCategory,
-  getAllCategories,
+  getCategoryByName,
+  listCategories,
   updateCategory,
   deleteCategory,
 } = category;
 
 const router = express.Router();
 
-router.post("/categories", protect, adminOnly, createCategory);
+router.post("/categories", protect, adminOnly, registerCategory);
 router.get("/categories/:id", protect, getCategory);
-router.get("/categories", protect, getAllCategories);
+router.get("/categories/name/:name", protect, getCategoryByName);
+router.get("/categories", protect, listCategories);
 router.put("/categories/:id", protect, adminOnly, updateCategory);
 router.delete("/categories/:id", protect, adminOnly, deleteCategory);
 

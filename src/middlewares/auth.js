@@ -1,7 +1,5 @@
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../config/prisma.js";
 
 export const protect = async (req, res, next) => {
   const header = req.headers.authorization;
@@ -36,7 +34,7 @@ export const protect = async (req, res, next) => {
 
 export const adminOnly = (req, res, next) => {
   if (!req.user || !req.user.isAdmin) {
-    return res.status(401).json({ message: "NNot authorized" });
+    return res.status(401).json({ message: "Not authorized" });
   }
   next();
 };

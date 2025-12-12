@@ -1,159 +1,83 @@
-import bcrypt from "bcryptjs";
 import * as userService from "../services/userService.js";
-import * as tokenUtils from "../utils/tokenUtils.js";
-import { registerUserSchema, loginUserSchema } from "../schemas/userSchema.js";
+import * as tokenService from "../services/tokenService.js";
+import { errorHandler } from "../utils/error/errorHandler.js";
 import { logger } from "../utils/logger.js";
-import { getZodErrorMessage } from "../utils/errorUtils.js";
 
-const {
-  generateAccessToken,
-  generateRefreshToken,
-  validateRefreshToken,
-  rotateRefreshToken,
-  revokeRefreshToken,
-} = tokenUtils;
+const { generateAccessToken, validateRefreshToken, rotateRefreshToken } =
+  tokenService;
 
-const { insertUser, findUserByEmailOrUsername, findUserById } = userService;
+const { createUser, getUserById, isLoginValid, logoutUserByToken } =
+  userService;
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: false, // Set true if using HTTPS
+  sameSite: "strict",
+  maxAge: 1000 * 60 * 60 * 24 * 7,
+  path: "/api/auth",
+};
 
 export const registerUser = async (req, res) => {
   try {
-    const payload = registerUserSchema.parse(req.body);
+    const payload = req.body;
 
-    const exists = await findUserByEmailOrUsername(
-      payload.email,
-      payload.username
-    );
-    if (exists) return res.status(400).json({ message: "User already exists" });
+    await createUser(payload);
 
-    const hash = await bcrypt.hash(payload.password, 10);
-
-    const data = {
-      username: payload.username,
-      email: payload.email,
-      password: hash,
-      isPrivate: false,
-      isAdmin: false,
-    };
-
-    const user = await insertUser(data);
-    const accessToken = generateAccessToken(user);
-    const refreshToken = await generateRefreshToken(user.id);
-
-    logger.info(`User created: ${user.email}`);
-
-    res
-      .status(201)
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: false, // Set true if using HTTPS
-        sameSite: "strict",
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-        path: "/auth/refresh",
-      })
-      .json({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        accessToken,
-      });
+    res.status(201).json({ message: "User created successfully" });
   } catch (err) {
-    logger.error(err);
-
-    const msg = getZodErrorMessage(err);
-    if (msg) return res.status(400).json({ message: msg });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const loginUser = async (req, res) => {
   try {
-    const payload = loginUserSchema.parse(req.body);
-    const { email, username, password } = payload;
+    const payload = req.body;
 
-    const user = await findUserByEmailOrUsername(email, username);
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const match = await bcrypt.compare(password, user.password);
-
-    if (!match) return res.status(400).json({ message: "Incorrect password" });
-    const accessToken = generateAccessToken(user);
-    const refreshToken = await generateRefreshToken(user.id);
-
-    logger.info(`Login: userId=${user.id}`);
+    const { user, accessToken, refreshToken } = await isLoginValid(payload);
 
     res
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: false, // Set true if using HTTPS
-        sameSite: "strict",
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-        path: "/auth/refresh",
-      })
-      .json({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        accessToken,
-      });
+      .status(200)
+      .cookie("refreshToken", refreshToken, cookieOptions)
+      .json({ user, accessToken });
   } catch (err) {
-    logger.error(err);
-
-    const msg = getZodErrorMessage(err);
-    if (msg) return res.status(400).json({ message: msg });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const logoutUser = async (req, res) => {
   try {
     const token = req.cookies.refreshToken;
-    if (!token) return res.status(400).json({ message: "Token missing" });
 
-    await revokeRefreshToken(token);
+    await logoutUserByToken(token);
 
     logger.info(`Logout: userId=${req.user.id}`);
 
-    res.json({ message: "Logout successful" });
+    res
+      .status(200)
+      .clearCookie("refreshToken", { path: "/api/auth" })
+      .json({ message: "Logout successful" });
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const refreshToken = async (req, res) => {
   try {
-    const { token } = req.body;
-    if (!token) return res.status(400).json({ message: "Token missing" });
+    const token = req.cookies.refreshToken;
 
     const valid = await validateRefreshToken(token);
-    if (!valid) return res.status(401).json({ message: "Refresh invalid" });
 
     const newRefresh = await rotateRefreshToken(token);
 
-    const user = await findUserById(valid.userId);
+    const user = await getUserById(valid.userId);
     const newAccess = generateAccessToken(user);
 
     logger.info(`Refresh emitted: userId=${valid.userId}`);
 
     res
-      .cookie("refreshToken", newRefresh, {
-        httpOnly: true,
-        secure: false, // Set true if using HTTPS
-        sameSite: "strict",
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-        path: "/auth/refresh",
-      })
+      .cookie("refreshToken", newRefresh, cookieOptions)
       .json({ accessToken: newAccess });
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };

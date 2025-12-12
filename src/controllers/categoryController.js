@@ -1,66 +1,56 @@
 import * as categoryService from "../services/categoryService.js";
-import { categorySchema } from "../schemas/categorySchema.js";
-import { logger } from "../utils/logger.js";
-import { getZodErrorMessage, parseAppError } from "../utils/errorUtils.js";
+import { errorHandler } from "../utils/error/errorHandler.js";
 
 const {
-  insertCategory,
-  findCategoryById,
-  findCategoryByName,
-  listCategories,
-  updateCategoryById,
-  deleteCategoryById,
+  createCategory,
+  getCategoryById,
+  getCategories,
+  editCategoryById,
+  removeCategoryById,
 } = categoryService;
 
-export const createCategory = async (req, res) => {
+export const registerCategory = async (req, res) => {
   try {
-    const payload = categorySchema.parse(req.body);
+    const payload = req.body;
 
-    const exists = await findCategoryByName(payload.name);
-    if (exists) {
-      return res.status(409).json({ message: "Category already exists" });
-    }
+    await createCategory(payload);
 
-    await insertCategory(payload);
     res.status(201).json({ message: "Category created successfully" });
   } catch (err) {
-    logger.error(err);
-
-    const msg = getZodErrorMessage(err);
-    if (msg) return res.status(400).json({ message: msg });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const getCategory = async (req, res) => {
   try {
-    const { id } = req.params;
-    const category = await findCategoryById(parseInt(id, 10));
-    if (!category) {
-      return res.status(404).json({ message: "Category not found" });
-    }
+    const id = parseInt(req.params.id, 10) || null;
+    const category = await getCategoryById(id);
     res.status(200).json(category);
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
-export const getAllCategories = async (req, res) => {
+export const getCategoryByName = async (req, res) => {
+  try {
+    const name = req.params.name || null;
+
+    const category = await categoryService.getCategoryByName(name);
+
+    res.status(200).json(category);
+  } catch (err) {
+    return errorHandler(err, res);
+  }
+};
+
+export const listCategories = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;
     const search = req.query.search || "";
     const skip = (page - 1) * limit;
 
-    const { items, total } = await listCategories(skip, limit, search);
-
-    if (items.length === 0) {
-      return res.status(404).json({ message: "No categories found" });
-    }
+    const { items, total } = await getCategories(skip, limit, search);
 
     res.status(200).json({
       page,
@@ -70,54 +60,31 @@ export const getAllCategories = async (req, res) => {
       categories: items,
     });
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const updateCategory = async (req, res) => {
   try {
-    const { id } = req.params;
-    const payload = categorySchema.parse(req.body);
-    const category = await findCategoryById(parseInt(id, 10));
+    const id = parseInt(req.params.id, 10) || null;
+    const payload = req.body;
 
-    if (!category) {
-      return res.status(404).json({ message: "Category not found" });
-    }
+    const updatedCategory = await editCategoryById(id, payload);
 
-    const updatedCategory = await updateCategoryById(parseInt(id, 10), payload);
     res.status(200).json(updatedCategory);
   } catch (err) {
-    logger.error(err);
-
-    const msg = getZodErrorMessage(err);
-    if (msg) return res.status(400).json({ message: msg });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const deleteCategory = async (req, res) => {
   try {
-    const { id } = req.params;
-    const category = await findCategoryById(parseInt(id, 10));
+    const id = parseInt(req.params.id, 10) || null;
 
-    if (!category) {
-      return res.status(404).json({ message: "Category not found" });
-    }
+    await removeCategoryById(id);
 
-    await deleteCategoryById(parseInt(id, 10));
-    res.status(200).json({ message: "Category deleted successfully" });
+    res.status(204).send();
   } catch (err) {
-    logger.error(err);
-
-    const appErr = parseAppError(err);
-    if (appErr)
-      return res.status(appErr.status).json({ message: appErr.message });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };

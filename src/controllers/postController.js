@@ -1,45 +1,54 @@
 import * as postService from "../services/postService.js";
-import { createPostSchema, updatePostSchema } from "../schemas/postSchema.js";
-import { logger } from "../utils/logger.js";
-import { getZodErrorMessage, parseAppError } from "../utils/errorUtils.js";
+import { errorHandler } from "../utils/error/errorHandler.js";
 
-const { insertPost, findPostById, listPosts, updatePostById, deletePostById } =
-  postService;
+const {
+  createPost,
+  getPostById,
+  getPosts,
+  getPostsByCategoryName,
+  editPostById,
+  removePostById,
+} = postService;
 
-export const createPost = async (req, res) => {
+export const registerPost = async (req, res) => {
   try {
-    const payload = createPostSchema.parse(req.body);
+    const payload = req.body;
 
     const data = { ...payload, authorId: req.user.id };
 
-    const post = await insertPost(data);
+    await createPost(data);
 
-    res.status(201).json(post);
+    res.status(201).json({ message: "Post created successfully" });
   } catch (err) {
-    logger.error(err);
-
-    const msg = getZodErrorMessage(err);
-    if (msg) return res.status(400).json({ message: msg });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const getPost = async (req, res) => {
-  const id = req.params.id;
   try {
-    const post = await findPostById(parseInt(id, 10));
-    if (!post) return res.status(404).json({ message: "Post not found" });
-    res.json(post);
+    const id = parseInt(req.params.id, 10);
+
+    const post = await getPostById(id);
+
+    res.status(200).json(post);
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
-export const getAllPosts = async (req, res) => {
+export const getPostByTitle = async (req, res) => {
+  try {
+    const title = req.params.title;
+
+    const post = await postService.getPostByTitle(title);
+
+    return res.status(200).json(post);
+  } catch (err) {
+    return errorHandler(err, res);
+  }
+};
+
+export const listPosts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -47,7 +56,36 @@ export const getAllPosts = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const { items, total } = await listPosts(skip, limit, search);
+    const { items, total } = await getPosts(skip, limit, search);
+
+    res.status(200).json({
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      posts: items,
+    });
+  } catch (err) {
+    return errorHandler(err, res);
+  }
+};
+
+export const listPostsByCategoryName = async (req, res) => {
+  try {
+    const categoryName = req.params.categoryName;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const search = req.query.search || "";
+
+    const skip = (page - 1) * limit;
+
+    const { items, total } = await getPostsByCategoryName(
+      categoryName,
+      skip,
+      limit,
+      search
+    );
 
     res.json({
       page,
@@ -57,49 +95,29 @@ export const getAllPosts = async (req, res) => {
       posts: items,
     });
   } catch (err) {
-    logger.error(err);
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const updatePost = async (req, res) => {
   try {
-    const { id } = req.params;
-    const payload = updatePostSchema.parse(req.body);
-    const post = await findPostById(parseInt(id, 10));
+    const id = parseInt(req.params.id, 10);
+    const payload = req.body;
 
-    if (!post) return res.status(404).json({ message: "Post not found" });
-
-    const updatedPost = await updatePostById(parseInt(id, 10), payload);
+    const updatedPost = await editPostById(id, payload);
     res.json(updatedPost);
   } catch (err) {
-    logger.error(err);
-
-    const msg = getZodErrorMessage(err);
-    if (msg) return res.status(400).json({ message: msg });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };
 
 export const deletePost = async (req, res) => {
   try {
-    const { id } = req.params;
-    const post = await findPostById(parseInt(id, 10));
+    const id = parseInt(req.params.id, 10);
 
-    if (!post) return res.status(404).json({ message: "Post not found" });
-    await deletePostById(parseInt(id, 10));
+    await removePostById(id);
     res.status(204).end();
   } catch (err) {
-    logger.error(err);
-
-    const appErr = parseAppError(err);
-    if (appErr)
-      return res.status(appErr.status).json({ message: appErr.message });
-
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    return errorHandler(err, res);
   }
 };

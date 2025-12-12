@@ -1,3 +1,13 @@
 node_modules/
-logs/*
+
 .env
+
+prisma/migrations/*
+
+logs/*
+
+.vscode/
+
+build/
+
+dist/

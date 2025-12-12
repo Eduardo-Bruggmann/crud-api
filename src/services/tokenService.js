@@ -1,21 +1,72 @@
-import { PrismaClient } from "@prisma/client";
+import * as tokenRepository from "../repositories/tokenRepository.js";
+import { findUserById } from "../repositories/userRepository.js";
+import { AppError } from "../utils/error/AppError.js";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
-const prisma = new PrismaClient();
+const { insertToken, findToken, deleteToken } = tokenRepository;
 
-export const insertToken = (userId, token) => {
-  return prisma.refreshToken.create({
-    data: {
-      userId,
-      token,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-    },
-  });
+export const getToken = async (token) => {
+  if (!token) throw new AppError("Token is missing", 400);
+
+  const stored = await findToken(token);
+
+  if (!stored) throw new AppError("Token not found", 404);
+
+  return stored;
 };
 
-export const findToken = (token) => {
-  return prisma.refreshToken.findUnique({ where: { token } });
+export const removeToken = async (token) => {
+  await getToken(token);
+  return await deleteToken(token);
 };
 
-export const deleteToken = (token) => {
-  return prisma.refreshToken.delete({ where: { token } });
+export const generateAccessToken = (user) => {
+  return jwt.sign(
+    { id: user.id, isAdmin: user.isAdmin },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  );
+};
+
+export const generateRefreshToken = async (userId) => {
+  const user = await findUserById(userId);
+
+  if (!user) throw new AppError("User not found", 404);
+
+  const token = crypto.randomBytes(64).toString("hex");
+
+  await insertToken(userId, token);
+
+  return token;
+};
+
+export const validateRefreshToken = async (token) => {
+  await getToken(token);
+
+  const stored = await findToken(token);
+  if (!stored) throw new AppError("Token not found", 404);
+
+  if (stored.expiresAt < new Date()) {
+    await deleteToken(token);
+    throw new AppError("Token expired", 401);
+  }
+
+  return stored;
+};
+
+export const rotateRefreshToken = async (oldToken) => {
+  const stored = await validateRefreshToken(oldToken);
+  if (!stored) throw new AppError("Invalid token", 401);
+
+  await deleteToken(oldToken);
+
+  return await generateRefreshToken(stored.userId);
+};
+
+export const revokeRefreshToken = async (token) => {
+  const stored = await getToken(token);
+  if (!stored) throw new AppError("Invalid token", 401);
+
+  return await deleteToken(token);
 };

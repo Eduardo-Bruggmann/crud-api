@@ -1,18 +1,25 @@
-import express from "express";
 import dotenv from "dotenv";
-import routes from "./src/routes/routes.js";
+import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { requestLogger } from "./src/middlewares/requestLogger.js";
+import routes from "./src/routes/routes.js";
 
 dotenv.config();
 
 const app = express();
 
+app.use(
+  cors({
+    origin: "http://localhost:8001",
+    credentials: true,
+  })
+);
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser());
 app.use(requestLogger);
 
 app.use("/api", routes);
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`Backend rodando na porta ${PORT}`));
+const PORT = process.env.PORT || 8001;
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

@@ -1,49 +1,45 @@
-import { PrismaClient } from "@prisma/client";
+import * as commentRepository from "../repositories/commentRepository.js";
+import { commentSchema } from "../schemas/commentSchema.js";
+import { getPostById } from "./postService.js";
+import { AppError } from "../utils/error/AppError.js";
 
-const prisma = new PrismaClient();
+const {
+  insertComment,
+  findCommentById,
+  listCommentsByPost,
+  deleteCommentById,
+} = commentRepository;
 
-const buildSearchFilter = (search) => {
-  const query = (search || "").trim();
-  if (!query) return {};
-  return {
-    OR: [{ content: { contains: query } }],
-  };
+export const createComment = async (payload) => {
+  const comment = commentSchema.parse(payload);
+
+  const postExists = await getPostById(comment.postId);
+
+  if (!postExists) throw new AppError("Post does not exist", 404);
+
+  return await insertComment(comment);
 };
 
-export const insertComment = (data) => prisma.comment.create({ data });
+export const getCommentById = async (id) => {
+  const comment = await findCommentById(id);
 
-export const findCommentById = (id) =>
-  prisma.comment.findUnique({ where: { id } });
+  if (!comment) throw new AppError("Comment not found", 404);
 
-export const listCommentsByPost = async (
-  postId,
-  skip = 0,
-  take = 20,
-  search = ""
-) => {
-  const where = { postId, ...buildSearchFilter(search) };
+  return comment;
+};
 
-  const [items, total] = await Promise.all([
-    prisma.comment.findMany({
-      skip,
-      take,
-      where,
-      select: {
-        id: true,
-        content: true,
-        createdAt: true,
-        authorId: true,
-        postId: true,
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.comment.count({ where }),
-  ]);
+export const getCommentsByPost = async (postId, skip, take, search) => {
+  const post = await getPostById(postId);
+
+  if (!post) throw new AppError("Post not found", 404);
+
+  const { items, total } = await listCommentsByPost(postId, skip, take, search);
 
   return { items, total };
 };
 
-export const deleteCommentById = (id) =>
-  prisma.comment.delete({
-    where: { id },
-  });
+export const removeCommentById = async (id) => {
+  await getCommentById(id);
+
+  return await deleteCommentById(id);
+};

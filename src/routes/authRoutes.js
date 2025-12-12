@@ -1,7 +1,7 @@
-import express from "express";
-import { protect } from "../middlewares/auth.js";
-import { authLimiter } from "../middlewares/rateLimit.js";
 import * as auth from "../controllers/authController.js";
+import { authLimiter } from "../middlewares/rateLimit.js";
+import { protect } from "../middlewares/auth.js";
+import express from "express";
 
 const { registerUser, loginUser, logoutUser, refreshToken } = auth;
 

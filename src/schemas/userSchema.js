@@ -35,16 +35,41 @@ export const loginUserSchema = z
     username: usernameField.optional(),
     password: passwordField,
   })
-  .refine((data) => data.email || data.username, {
+  .refine((data) => !data.email || !data.username, {
     message: "Email or username is required",
   });
 
-export const updateUserSchema = z.object({
-  username: usernameField.optional(),
-  email: emailField.optional(),
-  password: passwordField.optional(),
-  currentPassword: passwordField.optional(),
-  isPrivate: privacyField.optional(),
-  isAdmin: adminField.optional(),
-  avatar: avatarField.optional(),
-});
+export const updateUserSchema = z
+  .object({
+    username: usernameField.optional(),
+    email: emailField.optional(),
+    password: passwordField.optional(),
+    currentPassword: passwordField.optional(),
+    isPrivate: privacyField.optional(),
+    avatar: avatarField.optional(),
+  })
+  .refine((data) => Object.values(data).some((v) => v !== undefined), {
+    message: "At least one field must be provided",
+  });
+
+export const updateUserByAdminSchema = z
+  .object({
+    username: usernameField.optional(),
+    isAdmin: adminField.optional(),
+    avatar: avatarField.optional(),
+  })
+  .refine((data) => Object.values(data).some((v) => v !== undefined), {
+    message: "At least one field must be provided",
+  });
+
+export const resetPasswordSchema = z
+  .object({
+    email: emailField,
+    code: z.string().length(7, "Invalid code format"),
+    newPassword: passwordField,
+    confirmPassword: passwordField,
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });

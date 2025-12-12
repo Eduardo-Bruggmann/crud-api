@@ -6,6 +6,7 @@ export const createPostSchema = z.object({
     .string()
     .min(20, "Content too short")
     .max(6000, "Content too long"),
+  authorId: z.uuid(),
   categoryId: z.number().int("Invalid category ID").optional(),
 });
 
