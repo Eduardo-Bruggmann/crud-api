@@ -31,18 +31,6 @@ export const getCategory = async (req, res) => {
   }
 };
 
-export const getCategoryByName = async (req, res) => {
-  try {
-    const name = req.params.name || null;
-
-    const category = await categoryService.getCategoryByName(name);
-
-    res.status(200).json(category);
-  } catch (err) {
-    return errorHandler(err, res);
-  }
-};
-
 export const listCategories = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;

@@ -47,6 +47,7 @@ export const createUser = async (payload) => {
     isPrivate: false,
     isAdmin: false,
   };
+  delete insertData.confirmPassword;
 
   const user = await insertUser(insertData);
 
@@ -65,6 +66,7 @@ export const createUser = async (payload) => {
 
 export const createUserByAdmin = async (payload) => {
   const insertData = registerUserByAdminSchema.parse(payload);
+  delete insertData.confirmPassword;
 
   if (await findUserByEmailOrUsername(insertData.email, insertData.username))
     throw new AppError("User already exists", 400);

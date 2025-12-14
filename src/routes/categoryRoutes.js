@@ -5,7 +5,6 @@ import express from "express";
 const {
   registerCategory,
   getCategory,
-  getCategoryByName,
   listCategories,
   updateCategory,
   deleteCategory,
@@ -15,7 +14,6 @@ const router = express.Router();
 
 router.post("/categories", protect, adminOnly, registerCategory);
 router.get("/categories/:id", protect, getCategory);
-router.get("/categories/name/:name", protect, getCategoryByName);
 router.get("/categories", protect, listCategories);
 router.put("/categories/:id", protect, adminOnly, updateCategory);
 router.delete("/categories/:id", protect, adminOnly, deleteCategory);

@@ -36,18 +36,6 @@ export const getPost = async (req, res) => {
   }
 };
 
-export const getPostByTitle = async (req, res) => {
-  try {
-    const title = req.params.title;
-
-    const post = await postService.getPostByTitle(title);
-
-    return res.status(200).json(post);
-  } catch (err) {
-    return errorHandler(err, res);
-  }
-};
-
 export const listPosts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;

@@ -62,9 +62,10 @@ export const listCommentsByPost = async (req, res) => {
 
 export const deleteComment = async (req, res) => {
   try {
+    const postId = parseInt(req.params.postId, 10);
     const commentId = parseInt(req.params.commentId, 10);
 
-    await removeCommentById(commentId);
+    await removeCommentById(postId, commentId);
     res.status(204).send();
   } catch (err) {
     return errorHandler(err, res);

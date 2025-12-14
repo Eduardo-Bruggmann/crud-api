@@ -18,13 +18,19 @@ const adminField = z.boolean();
 
 const avatarField = z.string().max(255);
 
-export const registerUserSchema = z.object({
-  username: usernameField,
-  email: emailField,
-  password: passwordField,
-});
+export const registerUserSchema = z
+  .object({
+    username: usernameField,
+    email: emailField,
+    password: passwordField,
+    confirmPassword: passwordField,
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
-export const registerUserByAdminSchema = registerUserSchema.extend({
+export const registerUserByAdminSchema = registerUserSchema.safeExtend({
   isPrivate: privacyField.optional().default(false),
   isAdmin: adminField.optional().default(false),
 });

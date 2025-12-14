@@ -5,7 +5,7 @@
 		"description": "Endpoints for managing post categories.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "38437231",
-		"_collection_link": "https://www.postman.com/e-bruggmann/workspace/4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-0cb1e8f3-83ed-40e0-b680-c0e3186a81f6?action=share&source=collection_link&creator=38437231"
+		"_collection_link": "https://e-bruggmann.postman.co/workspace/CRUD-API---TESTS~4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-0cb1e8f3-83ed-40e0-b680-c0e3186a81f6?action=share&source=collection_link&creator=38437231"
 	},
 	"item": [
 		{
@@ -47,25 +47,6 @@
 					]
 				},
 				"description": "Fetches a category by its unique ID."
-			},
-			"response": []
-		},
-		{
-			"name": "getCategoryByName",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{category}}/name/insert_a_category_name_here",
-					"host": [
-						"{{category}}"
-					],
-					"path": [
-						"name",
-						"insert_a_category_name_here"
-					]
-				},
-				"description": "Retrieves a category using its name instead of the ID."
 			},
 			"response": []
 		},

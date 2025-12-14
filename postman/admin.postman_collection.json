@@ -5,7 +5,7 @@
 		"description": "Endpoints for admin-level user management and operations.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "38437231",
-		"_collection_link": "https://www.postman.com/e-bruggmann/workspace/4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-969b8bdf-2f6a-4a76-8323-35afe92169ad?action=share&source=collection_link&creator=38437231"
+		"_collection_link": "https://e-bruggmann.postman.co/workspace/CRUD-API---TESTS~4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-969b8bdf-2f6a-4a76-8323-35afe92169ad?action=share&source=collection_link&creator=38437231"
 	},
 	"item": [
 		{
@@ -15,7 +15,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"Mock\",\r\n    \"email\": \"mock@email.com\",\r\n    \"password\": \"mock123\",\r\n    \"isPrivate\": false,\r\n    \"isAdmin\": true\r\n}",
+					"raw": "{\r\n    \"username\": \"Mock\",\r\n    \"email\": \"mock@email.com\",\r\n    \"password\": \"mock123\",\r\n    \"confirmPassword\": \"mock123\",\r\n    \"isPrivate\": false,\r\n    \"isAdmin\": true\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -115,6 +115,9 @@
 			"response": []
 		}
 	],
+	"auth": {
+		"type": "bearer"
+	},
 	"event": [
 		{
 			"listen": "prerequest",

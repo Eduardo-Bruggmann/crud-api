@@ -5,7 +5,7 @@
 		"description": "Authentication-related endpoints: register, login, logout, and token refresh.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "38437231",
-		"_collection_link": "https://www.postman.com/e-bruggmann/workspace/4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-f71a8645-6cf5-4236-91d5-edfd7d6a68e8?action=share&source=collection_link&creator=38437231"
+		"_collection_link": "https://e-bruggmann.postman.co/workspace/CRUD-API---TESTS~4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-f71a8645-6cf5-4236-91d5-edfd7d6a68e8?action=share&source=collection_link&creator=38437231"
 	},
 	"item": [
 		{
@@ -18,7 +18,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"Mock\",\r\n    \"email\": \"mock@email.com\",\r\n    \"password\": \"mock123\"\r\n}",
+					"raw": "{\r\n    \"username\": \"Mock\",\r\n    \"email\": \"mock@email.com\",\r\n    \"password\": \"mock123\",\r\n    \"confirmPassword\": \"mock123\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

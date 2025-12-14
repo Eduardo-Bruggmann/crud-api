@@ -8,6 +8,6 @@ const router = express.Router();
 
 router.post("/posts/:postId/comments", protect, registerComment);
 router.get("/posts/:postId/comments", listCommentsByPost);
-router.delete("/comments/:commentId", protect, deleteComment);
+router.delete("/posts/:postId/comments/:commentId", protect, deleteComment);
 
 export default router;

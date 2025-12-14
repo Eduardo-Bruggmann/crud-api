@@ -22,14 +22,6 @@ export const createCategory = async (payload) => {
   return await insertCategory(category);
 };
 
-export const getCategoryByName = async (name) => {
-  const category = await findCategoryByName(name);
-
-  if (!category) throw new AppError("Category not found", 404);
-
-  return category;
-};
-
 export const getCategoryById = async (id) => {
   const category = await findCategoryById(id);
 

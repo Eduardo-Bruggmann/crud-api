@@ -5,7 +5,7 @@
 		"description": "Endpoints for creating, retrieving, updating, and deleting posts.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "38437231",
-		"_collection_link": "https://www.postman.com/e-bruggmann/workspace/4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-2d6206ce-7930-4a13-a83a-e7b6b48ff19e?action=share&source=collection_link&creator=38437231"
+		"_collection_link": "https://e-bruggmann.postman.co/workspace/CRUD-API---TESTS~4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-2d6206ce-7930-4a13-a83a-e7b6b48ff19e?action=share&source=collection_link&creator=38437231"
 	},
 	"item": [
 		{
@@ -47,25 +47,6 @@
 					]
 				},
 				"description": "Returns the full details of a specific post using its ID."
-			},
-			"response": []
-		},
-		{
-			"name": "getPostByTitle",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{post}}/title/insert_a_post_title_here",
-					"host": [
-						"{{post}}"
-					],
-					"path": [
-						"title",
-						"insert_a_post_title_here"
-					]
-				},
-				"description": "Fetches a post by its title. Useful when titles are unique identifiers or search keys."
 			},
 			"response": []
 		},

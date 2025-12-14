@@ -32,14 +32,6 @@ export const getPostById = (id) => {
   return post;
 };
 
-export const getPostByTitle = (title) => {
-  const post = findPostByTitle(title);
-
-  if (!post) throw new AppError("Post not found", 404);
-
-  return post;
-};
-
 export const getPosts = async (skip, take, search) => {
   const { items, total } = await listPosts(skip, take, search);
 

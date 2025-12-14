@@ -29,17 +29,16 @@ export const getCommentById = async (id) => {
 };
 
 export const getCommentsByPost = async (postId, skip, take, search) => {
-  const post = await getPostById(postId);
-
-  if (!post) throw new AppError("Post not found", 404);
+  await getPostById(postId);
 
   const { items, total } = await listCommentsByPost(postId, skip, take, search);
 
   return { items, total };
 };
 
-export const removeCommentById = async (id) => {
-  await getCommentById(id);
+export const removeCommentById = async (postId, commentId) => {
+  await getPostById(postId);
+  await getCommentById(commentId);
 
-  return await deleteCommentById(id);
+  return await deleteCommentById(commentId);
 };
