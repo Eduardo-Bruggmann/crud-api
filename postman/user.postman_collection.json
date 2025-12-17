@@ -5,7 +5,7 @@
 		"description": "Endpoints for managing the logged-in user's own profile and password.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "38437231",
-		"_collection_link": "https://www.postman.com/e-bruggmann/workspace/4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-80b1d7a0-56a2-45d6-b7a8-016b01267be1?action=share&source=collection_link&creator=38437231"
+		"_collection_link": "https://e-bruggmann.postman.co/workspace/CRUD-API---TESTS~4916fb27-4f1d-44d0-ad59-1f07b3ca88d5/collection/38437231-80b1d7a0-56a2-45d6-b7a8-016b01267be1?action=share&source=collection_link&creator=38437231"
 	},
 	"item": [
 		{
@@ -68,62 +68,6 @@
 					]
 				},
 				"description": "Updates the authenticated user's profile. Requires the current password for email or password changes."
-			},
-			"response": []
-		},
-		{
-			"name": "requestResetPassword",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"mock@email.com\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{user}}/reset-password/request",
-					"host": [
-						"{{user}}"
-					],
-					"path": [
-						"reset-password",
-						"request"
-					]
-				},
-				"description": "Generates a reset password code and sends it to the user's email."
-			},
-			"response": []
-		},
-		{
-			"name": "confirmResetPassword",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"mock@email.com\",\r\n    \"code\": \"123-456\",\r\n    \"newPassword\": \"newmock123\",\r\n    \"confirmPassword\": \"newmock123\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{user}}/reset-password/confirm",
-					"host": [
-						"{{user}}"
-					],
-					"path": [
-						"reset-password",
-						"confirm"
-					]
-				},
-				"description": "Resets the user's password using the code sent via email."
 			},
 			"response": []
 		},

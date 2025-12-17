@@ -9,7 +9,7 @@
 	},
 	"item": [
 		{
-			"name": "registerPost",
+			"name": "createPost",
 			"request": {
 				"method": "POST",
 				"header": [],

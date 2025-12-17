@@ -8,8 +8,8 @@ const {
   insertPost,
   findPostById,
   findPostByTitle,
-  listPosts,
-  listPostsByCategoryName,
+  findManyPosts,
+  findManyPostsByCategoryName,
   updatePostById,
   deletePostById,
 } = postRepository;
@@ -24,7 +24,7 @@ export const createPost = async (payload) => {
   return await insertPost(data);
 };
 
-export const getPostById = (id) => {
+export const getPost = (id) => {
   const post = findPostById(id);
 
   if (!post) throw new AppError("Post not found", 404);
@@ -32,13 +32,13 @@ export const getPostById = (id) => {
   return post;
 };
 
-export const getPosts = async (skip, take, search) => {
-  const { items, total } = await listPosts(skip, take, search);
+export const listPosts = async (skip, take, search) => {
+  const { items, total } = await findManyPosts(skip, take, search);
 
   return { items, total };
 };
 
-export const getPostsByCategoryName = async (
+export const listPostsByCategoryName = async (
   categoryName,
   skip,
   take,
@@ -48,7 +48,7 @@ export const getPostsByCategoryName = async (
 
   if (!category) throw new AppError("Category not found", 404);
 
-  const { items, total } = await listPostsByCategoryName(
+  const { items, total } = await findManyPostsByCategoryName(
     categoryName,
     skip,
     take,
@@ -58,16 +58,16 @@ export const getPostsByCategoryName = async (
   return { items, total };
 };
 
-export const editPostById = async (id, payload) => {
-  await getPostById(id);
+export const updatePost = async (id, payload) => {
+  await getPost(id);
 
   const updateData = updatePostSchema.parse(payload);
 
   return await updatePostById(id, updateData);
 };
 
-export const removePostById = async (id) => {
-  await getPostById(id);
+export const deletePost = async (id) => {
+  await getPost(id);
 
   if (commentCount({ postId: id }) > 0) {
     throw new AppError("Post has comments and cannot be deleted", 409);

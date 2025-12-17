@@ -7,7 +7,7 @@ const {
   insertCategory,
   findCategoryByName,
   findCategoryById,
-  listCategories,
+  findManyCategories,
   updateCategoryById,
   deleteCategoryById,
 } = categoryRepository;
@@ -22,7 +22,7 @@ export const createCategory = async (payload) => {
   return await insertCategory(category);
 };
 
-export const getCategoryById = async (id) => {
+export const getCategory = async (id) => {
   const category = await findCategoryById(id);
 
   if (!category) throw new AppError("Category not found", 404);
@@ -30,22 +30,22 @@ export const getCategoryById = async (id) => {
   return category;
 };
 
-export const getCategories = async (skip, take, search) => {
-  const { items, total } = await listCategories(skip, take, search);
+export const listCategories = async (skip, take, search) => {
+  const { items, total } = await findManyCategories(skip, take, search);
 
   return { items, total };
 };
 
-export const editCategoryById = async (id, data) => {
-  await getCategoryById(id);
+export const updateCategory = async (id, data) => {
+  await getCategory(id);
 
   const updatedData = categorySchema.parse(data);
 
   return await updateCategoryById(id, updatedData);
 };
 
-export const removeCategoryById = async (id) => {
-  await getCategoryById(id);
+export const deleteCategory = async (id) => {
+  await getCategory(id);
 
   if ((await postCount({ categoryId: id })) > 0)
     throw new AppError("Category has posts and cannot be deleted", 409);

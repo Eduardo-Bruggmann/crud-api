@@ -9,7 +9,7 @@
 	},
 	"item": [
 		{
-			"name": "registerUser",
+			"name": "register",
 			"request": {
 				"auth": {
 					"type": "noauth"
@@ -39,7 +39,7 @@
 			"response": []
 		},
 		{
-			"name": "loginUser",
+			"name": "login",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -66,7 +66,7 @@
 			"response": []
 		},
 		{
-			"name": "logoutUser",
+			"name": "logout",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -93,7 +93,7 @@
 			"response": []
 		},
 		{
-			"name": "refreshToken",
+			"name": "refreshTokens",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -106,7 +106,63 @@
 						"refresh"
 					]
 				},
-				"description": "Generates a new access token using a valid refresh token."
+				"description": "Generates a new access and refresh token using a valid refresh token."
+			},
+			"response": []
+		},
+		{
+			"name": "requestResetPassword",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"mock@email.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{auth}}/reset-password/request",
+					"host": [
+						"{{auth}}"
+					],
+					"path": [
+						"reset-password",
+						"request"
+					]
+				},
+				"description": "Generates a reset password code and sends it to the user's email."
+			},
+			"response": []
+		},
+		{
+			"name": "confirmResetPassword",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"mock@email.com\",\r\n    \"code\": \"123-456\",\r\n    \"newPassword\": \"newmock123\",\r\n    \"confirmPassword\": \"newmock123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{auth}}/reset-password/confirm",
+					"host": [
+						"{{auth}}"
+					],
+					"path": [
+						"reset-password",
+						"confirm"
+					]
+				},
+				"description": "Resets the user's password using the code sent via email."
 			},
 			"response": []
 		}

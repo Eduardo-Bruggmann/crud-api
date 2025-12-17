@@ -1,21 +1,13 @@
 import * as categoryService from "../services/categoryService.js";
 import { errorHandler } from "../utils/error/errorHandler.js";
 
-const {
-  createCategory,
-  getCategoryById,
-  getCategories,
-  editCategoryById,
-  removeCategoryById,
-} = categoryService;
-
-export const registerCategory = async (req, res) => {
+export const createCategory = async (req, res) => {
   try {
     const payload = req.body;
 
-    await createCategory(payload);
+    const category = await categoryService.createCategory(payload);
 
-    res.status(201).json({ message: "Category created successfully" });
+    res.status(201).json(category);
   } catch (err) {
     return errorHandler(err, res);
   }
@@ -24,7 +16,7 @@ export const registerCategory = async (req, res) => {
 export const getCategory = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10) || null;
-    const category = await getCategoryById(id);
+    const category = await categoryService.getCategory(id);
     res.status(200).json(category);
   } catch (err) {
     return errorHandler(err, res);
@@ -38,7 +30,11 @@ export const listCategories = async (req, res) => {
     const search = req.query.search || "";
     const skip = (page - 1) * limit;
 
-    const { items, total } = await getCategories(skip, limit, search);
+    const { items, total } = await categoryService.listCategories(
+      skip,
+      limit,
+      search
+    );
 
     res.status(200).json({
       page,
@@ -57,7 +53,7 @@ export const updateCategory = async (req, res) => {
     const id = parseInt(req.params.id, 10) || null;
     const payload = req.body;
 
-    const updatedCategory = await editCategoryById(id, payload);
+    const updatedCategory = await categoryService.updateCategory(id, payload);
 
     res.status(200).json(updatedCategory);
   } catch (err) {
@@ -69,7 +65,7 @@ export const deleteCategory = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10) || null;
 
-    await removeCategoryById(id);
+    await categoryService.deleteCategory(id);
 
     res.status(204).send();
   } catch (err) {

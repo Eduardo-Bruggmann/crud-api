@@ -1,10 +1,7 @@
 import * as commentService from "../services/commentService.js";
 import { errorHandler } from "../utils/error/errorHandler.js";
 
-const { createComment, getCommentById, getCommentsByPost, removeCommentById } =
-  commentService;
-
-export const registerComment = async (req, res) => {
+export const createComment = async (req, res) => {
   try {
     const postId = parseInt(req.params.postId, 10);
     const payload = {
@@ -13,20 +10,8 @@ export const registerComment = async (req, res) => {
       postId,
     };
 
-    const comment = await createComment(payload);
+    const comment = await commentService.createComment(payload);
     res.status(201).json(comment);
-  } catch (err) {
-    return errorHandler(err, res);
-  }
-};
-
-export const getComment = async (req, res) => {
-  try {
-    const commentId = parseInt(req.params.commentId, 10);
-
-    const comment = await getCommentById(commentId);
-
-    res.status(200).json(comment);
   } catch (err) {
     return errorHandler(err, res);
   }
@@ -41,7 +26,7 @@ export const listCommentsByPost = async (req, res) => {
     const search = req.query.search || "";
     const skip = (page - 1) * limit;
 
-    const { items, total } = await getCommentsByPost(
+    const { items, total } = await commentService.listCommentsByPost(
       postId,
       skip,
       limit,
@@ -65,7 +50,7 @@ export const deleteComment = async (req, res) => {
     const postId = parseInt(req.params.postId, 10);
     const commentId = parseInt(req.params.commentId, 10);
 
-    await removeCommentById(postId, commentId);
+    await commentService.deleteComment(postId, commentId);
     res.status(204).send();
   } catch (err) {
     return errorHandler(err, res);

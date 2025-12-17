@@ -9,7 +9,7 @@
 	},
 	"item": [
 		{
-			"name": "registerComment",
+			"name": "createComment",
 			"request": {
 				"method": "POST",
 				"header": [],

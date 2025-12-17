@@ -16,7 +16,7 @@ export const findPostById = async (id) =>
 export const findPostByTitle = async (title) =>
   await prisma.post.findUnique({ where: { title } });
 
-export const listPosts = async (skip = 0, take = 20, search = "") => {
+export const findManyPosts = async (skip = 0, take = 20, search = "") => {
   const where = buildSearchFilter(search);
   const select = {
     id: true,
@@ -42,7 +42,7 @@ export const listPosts = async (skip = 0, take = 20, search = "") => {
   return { items, total };
 };
 
-export const listPostsByCategoryName = async (
+export const findManyPostsByCategoryName = async (
   categoryName,
   skip = 0,
   take = 20,

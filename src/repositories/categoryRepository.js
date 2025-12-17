@@ -17,7 +17,7 @@ export const findCategoryById = async (id) =>
 export const findCategoryByName = async (name) =>
   await prisma.category.findUnique({ where: { name } });
 
-export const listCategories = async (skip = 0, take = 20, search = "") => {
+export const findManyCategories = async (skip = 0, take = 20, search = "") => {
   const where = buildSearchFilter(search);
 
   const [items, total] = await Promise.all([

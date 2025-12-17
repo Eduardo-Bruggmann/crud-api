@@ -41,7 +41,7 @@ export const findUserById = async (id) =>
     },
   });
 
-export const listUsers = async (skip, take, search) => {
+export const findManyUsers = async (skip, take, search) => {
   const where = buildSearchFilter(search);
 
   const [items, total] = await Promise.all([
@@ -56,7 +56,7 @@ export const listUsers = async (skip, take, search) => {
   return { items, total };
 };
 
-export const listPublicUsers = async (skip, take, search) => {
+export const findManyPublicUsers = async (skip, take, search) => {
   const where = {
     ...buildSearchFilter(search),
     isPrivate: false,

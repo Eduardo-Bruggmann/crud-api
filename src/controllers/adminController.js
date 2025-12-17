@@ -1,24 +1,17 @@
+import * as adminService from "../services/adminService.js";
 import * as userService from "../services/userService.js";
 import { errorHandler } from "../utils/error/errorHandler.js";
 import { logger } from "../utils/logger.js";
 
-const {
-  createUserByAdmin,
-  getUserById,
-  getUsers,
-  editUserByIdAsAdmin,
-  removeUserById,
-} = userService;
-
-export const registerUser = async (req, res) => {
+export const createUser = async (req, res) => {
   try {
     const payload = req.body;
 
-    const user = await createUserByAdmin(payload);
+    const user = await adminService.createUser(payload);
 
     logger.info(`User created: ${user.email}`);
 
-    res.status(201).json({ message: "User created successfully" });
+    res.status(201).json(user);
   } catch (err) {
     return errorHandler(err, res);
   }
@@ -28,7 +21,7 @@ export const getUser = async (req, res) => {
   try {
     const id = req.params.id;
 
-    const user = await getUserById(id);
+    const user = await userService.getUser(id);
 
     res.status(200).json(user);
   } catch (err) {
@@ -44,7 +37,7 @@ export const listUsers = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const { items, total } = await getUsers(skip, limit, search);
+    const { items, total } = await adminService.listUsers(skip, limit, search);
 
     res.status(200).json({
       page,
@@ -64,11 +57,11 @@ export const updateUser = async (req, res) => {
 
     const payload = req.body;
 
-    await getUserById(id);
+    await userService.getUser(id);
 
-    const updated = await editUserByIdAsAdmin(id, payload);
+    const updatedUser = await adminService.updateUser(id, payload);
 
-    res.status(200).json(updated);
+    res.status(200).json(updatedUser);
   } catch (err) {
     return errorHandler(err, res);
   }
@@ -78,9 +71,9 @@ export const deleteUser = async (req, res) => {
   try {
     const id = req.params.id;
 
-    await getUserById(id);
+    await userService.getUser(id);
 
-    await removeUserById(id);
+    await userService.deleteUser(id);
 
     logger.warn(`User soft-deleted: id=${id}`);
 

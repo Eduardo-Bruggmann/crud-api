@@ -9,7 +9,7 @@
 	},
 	"item": [
 		{
-			"name": "registerCategory",
+			"name": "createCategory",
 			"request": {
 				"method": "POST",
 				"header": [],

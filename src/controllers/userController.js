@@ -2,18 +2,9 @@ import * as userService from "../services/userService.js";
 import { errorHandler } from "../utils/error/errorHandler.js";
 import { logger } from "../utils/logger.js";
 
-const {
-  getUserById,
-  getPublicUsers,
-  editUserById,
-  removeUserById,
-  generateResetPasswordCode,
-  resetPasswordWithCode,
-} = userService;
-
 export const getUser = async (req, res) => {
   try {
-    const user = await getUserById(req.user.id);
+    const user = await userService.getUser(req.user.id);
 
     res.status(200).json(user);
   } catch (err) {
@@ -29,7 +20,11 @@ export const listPublicUsers = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const { items, total } = await getPublicUsers(skip, limit, search);
+    const { items, total } = await userService.listPublicUsers(
+      skip,
+      limit,
+      search
+    );
 
     res.status(200).json({
       page,
@@ -48,9 +43,9 @@ export const updateUser = async (req, res) => {
     const id = req.user.id;
     const payload = req.body;
 
-    const updated = await editUserById(id, payload);
+    const updatedUser = await userService.updateUser(id, payload);
 
-    res.status(200).json(updated);
+    res.status(200).json(updatedUser);
   } catch (err) {
     return errorHandler(err, res);
   }
@@ -59,35 +54,11 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const id = req.user.id;
-    await removeUserById(id);
+    await userService.deleteUser(id);
 
     logger.warn(`User soft-deleted: id=${id}`);
 
     res.status(204).send();
-  } catch (err) {
-    return errorHandler(err, res);
-  }
-};
-
-export const requestPasswordReset = async (req, res) => {
-  try {
-    const email = req.body.email;
-
-    await generateResetPasswordCode(email);
-
-    res.status(200).json({ message: "Reset code sent" });
-  } catch (err) {
-    return errorHandler(err, res);
-  }
-};
-
-export const confirmPasswordReset = async (req, res) => {
-  try {
-    const payload = req.body;
-
-    await resetPasswordWithCode(payload);
-
-    res.status(200).json({ message: "Password updated successfully" });
   } catch (err) {
     return errorHandler(err, res);
   }

@@ -1,24 +1,15 @@
 import * as postService from "../services/postService.js";
 import { errorHandler } from "../utils/error/errorHandler.js";
 
-const {
-  createPost,
-  getPostById,
-  getPosts,
-  getPostsByCategoryName,
-  editPostById,
-  removePostById,
-} = postService;
-
-export const registerPost = async (req, res) => {
+export const createPost = async (req, res) => {
   try {
     const payload = req.body;
 
     const data = { ...payload, authorId: req.user.id };
 
-    await createPost(data);
+    const post = await postService.createPost(data);
 
-    res.status(201).json({ message: "Post created successfully" });
+    res.status(201).json(post);
   } catch (err) {
     return errorHandler(err, res);
   }
@@ -28,7 +19,7 @@ export const getPost = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
 
-    const post = await getPostById(id);
+    const post = await postService.getPost(id);
 
     res.status(200).json(post);
   } catch (err) {
@@ -44,7 +35,7 @@ export const listPosts = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const { items, total } = await getPosts(skip, limit, search);
+    const { items, total } = await postService.listPosts(skip, limit, search);
 
     res.status(200).json({
       page,
@@ -68,7 +59,7 @@ export const listPostsByCategoryName = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const { items, total } = await getPostsByCategoryName(
+    const { items, total } = await postService.listPostsByCategoryName(
       categoryName,
       skip,
       limit,
@@ -92,7 +83,7 @@ export const updatePost = async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const payload = req.body;
 
-    const updatedPost = await editPostById(id, payload);
+    const updatedPost = await postService.updatePost(id, payload);
     res.json(updatedPost);
   } catch (err) {
     return errorHandler(err, res);
@@ -103,7 +94,7 @@ export const deletePost = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
 
-    await removePostById(id);
+    await postService.deletePost(id);
     res.status(204).end();
   } catch (err) {
     return errorHandler(err, res);

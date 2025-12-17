@@ -14,7 +14,7 @@ export const insertComment = async (data) =>
 export const findCommentById = async (id) =>
   await prisma.comment.findUnique({ where: { id } });
 
-export const listCommentsByPost = async (
+export const fidManyCommentsByPost = async (
   postId,
   skip = 0,
   take = 20,

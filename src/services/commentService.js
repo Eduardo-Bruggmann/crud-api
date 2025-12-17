@@ -1,12 +1,12 @@
 import * as commentRepository from "../repositories/commentRepository.js";
 import { commentSchema } from "../schemas/commentSchema.js";
-import { getPostById } from "./postService.js";
+import { getPost } from "./postService.js";
 import { AppError } from "../utils/error/AppError.js";
 
 const {
   insertComment,
   findCommentById,
-  listCommentsByPost,
+  findManyCommentsByPost,
   deleteCommentById,
 } = commentRepository;
 
@@ -20,7 +20,7 @@ export const createComment = async (payload) => {
   return await insertComment(comment);
 };
 
-export const getCommentById = async (id) => {
+export const getComment = async (id) => {
   const comment = await findCommentById(id);
 
   if (!comment) throw new AppError("Comment not found", 404);
@@ -28,17 +28,22 @@ export const getCommentById = async (id) => {
   return comment;
 };
 
-export const getCommentsByPost = async (postId, skip, take, search) => {
-  await getPostById(postId);
+export const listCommentsByPost = async (postId, skip, take, search) => {
+  await getPost(postId);
 
-  const { items, total } = await listCommentsByPost(postId, skip, take, search);
+  const { items, total } = await findManyCommentsByPost(
+    postId,
+    skip,
+    take,
+    search
+  );
 
   return { items, total };
 };
 
-export const removeCommentById = async (postId, commentId) => {
-  await getPostById(postId);
-  await getCommentById(commentId);
+export const deleteComment = async (postId, commentId) => {
+  await getPost(postId);
+  await getComment(commentId);
 
   return await deleteCommentById(commentId);
 };

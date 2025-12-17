@@ -3,7 +3,7 @@ import { protect, adminOnly } from "../middlewares/auth.js";
 import express from "express";
 
 const {
-  registerCategory,
+  createCategory,
   getCategory,
   listCategories,
   updateCategory,
@@ -12,7 +12,7 @@ const {
 
 const router = express.Router();
 
-router.post("/categories", protect, adminOnly, registerCategory);
+router.post("/categories", protect, adminOnly, createCategory);
 router.get("/categories/:id", protect, getCategory);
 router.get("/categories", protect, listCategories);
 router.put("/categories/:id", protect, adminOnly, updateCategory);
