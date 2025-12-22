@@ -4,8 +4,10 @@ import { updateUserSchema } from "../schemas/userSchema.js";
 import { sanitizeUser, sanitizeUsers } from "../utils/sanitizeUser.js";
 import { postCount } from "../repositories/postRepository.js";
 import { commentCount } from "../repositories/commentRepository.js";
+import { deleteFile } from "../utils/deleteFile.js";
 import { AppError } from "../utils/error/AppError.js";
 import bcrypt from "bcryptjs";
+import path from "path";
 
 const {
   findUserByEmailOrUsername,
@@ -44,7 +46,6 @@ export const updateUser = async (id, payload) => {
   const updateData = updateUserSchema.parse(payload);
 
   const needsCurrentPassword = updateData.email || updateData.password;
-
   if (needsCurrentPassword && !updateData.currentPassword)
     throw new AppError(
       "Current password is required to change email or password",
@@ -68,6 +69,9 @@ export const updateUser = async (id, payload) => {
   const updatedUser = await updateUserById(id, updateData);
 
   if (!updatedUser) throw new AppError("Failed to update user", 500);
+
+  const isAvatar = updateData.avatar && updateData.avatar !== user.avatar;
+  if (isAvatar && user.avatar) await deleteFile(path.basename(user.avatar));
 
   return sanitizeUser(updatedUser);
 };

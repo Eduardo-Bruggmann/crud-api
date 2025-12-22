@@ -11,13 +11,15 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:8001",
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   })
 );
 app.use(express.json());
 app.use(cookieParser());
 app.use(requestLogger);
+
+app.use("/avatars", express.static("uploads/avatars"));
 
 app.use("/api", routes);
 

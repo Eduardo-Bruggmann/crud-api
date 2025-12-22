@@ -56,8 +56,9 @@ export const updateUser = async (req, res) => {
     const id = req.params.id;
 
     const payload = req.body;
+    const avatarFile = req.file ?? null;
 
-    await userService.getUser(id);
+    if (avatarFile) payload.avatar = `/avatars/${avatarFile.filename}`;
 
     const updatedUser = await adminService.updateUser(id, payload);
 
@@ -70,8 +71,6 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const id = req.params.id;
-
-    await userService.getUser(id);
 
     await userService.deleteUser(id);
 

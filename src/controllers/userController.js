@@ -42,6 +42,9 @@ export const updateUser = async (req, res) => {
   try {
     const id = req.user.id;
     const payload = req.body;
+    const avatarFile = req.file ?? null;
+
+    if (avatarFile) payload.avatar = `/avatars/${avatarFile.filename}`;
 
     const updatedUser = await userService.updateUser(id, payload);
 
@@ -58,7 +61,7 @@ export const deleteUser = async (req, res) => {
 
     logger.warn(`User soft-deleted: id=${id}`);
 
-    res.status(204).send();
+    res.status(204).clearCookie("accessToken", { path: "/api/auth" });
   } catch (err) {
     return errorHandler(err, res);
   }

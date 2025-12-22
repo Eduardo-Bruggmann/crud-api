@@ -11,7 +11,7 @@ export const getToken = async (token) => {
 
   const stored = await findToken(token);
 
-  if (!stored) throw new AppError("Token not found", 404);
+  if (!stored) throw new AppError("Invalid token", 401);
 
   return stored;
 };
@@ -42,10 +42,8 @@ export const generateRefreshToken = async (userId) => {
 };
 
 export const validateRefreshToken = async (token) => {
-  await getToken(token);
-
   const stored = await findToken(token);
-  if (!stored) throw new AppError("Token not found", 404);
+  if (!stored) throw new AppError("Invalid token", 401);
 
   if (stored.expiresAt < new Date()) {
     await deleteToken(token);
@@ -65,8 +63,7 @@ export const rotateRefreshToken = async (oldToken) => {
 };
 
 export const revokeRefreshToken = async (token) => {
-  const stored = await getToken(token);
-  if (!stored) throw new AppError("Invalid token", 401);
+  if (!token) throw new AppError("Token is missing", 400);
 
   return await deleteToken(token);
 };

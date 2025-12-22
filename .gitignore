@@ -6,6 +6,8 @@ prisma/migrations/*
 
 logs/*
 
+uploads/avatars/*
+
 .vscode/
 
 build/

@@ -1,7 +1,8 @@
 import * as userRepository from "../repositories/userRepository.js";
 import * as userService from "./userService.js";
 import * as tokenService from "./tokenService.js";
-import * as authSchema from "../schemas/userSchema.js";
+import * as emailService from "../services/email/emailService.js";
+import * as authSchema from "../schemas/authSchema.js";
 import { sanitizeUser } from "../utils/sanitizeUser.js";
 import { AppError } from "../utils/error/AppError.js";
 import bcrypt from "bcryptjs";
@@ -11,10 +12,12 @@ import { logger } from "../utils/logger.js";
 const { insertUser, findUserByEmailOrUsername, updateUserById } =
   userRepository;
 
-const { registerSchema, loginSchema, resetPasswordSchema } = authSchema;
-
 const { generateAccessToken, generateRefreshToken, revokeRefreshToken } =
   tokenService;
+
+const { sendVerificationEmail, sendResetPasswordEmail } = emailService;
+
+const { registerSchema, loginSchema, resetPasswordSchema } = authSchema;
 
 export const register = async (payload) => {
   const data = registerSchema.parse(payload);
@@ -75,7 +78,7 @@ export const refreshTokens = async (oldToken) => {
 
   const newRefresh = await tokenService.rotateRefreshToken(oldToken);
 
-  const user = await userService.getUserById(valid.userId);
+  const user = await userService.getUser(valid.userId);
   const newAccess = tokenService.generateAccessToken(user);
 
   logger.info(`Refresh emitted: userId=${valid.userId}`);

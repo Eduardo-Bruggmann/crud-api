@@ -3,7 +3,10 @@ import * as emailService from "../services/email/emailService.js";
 import * as adminSchema from "../schemas/adminSchema.js";
 import { sanitizeUser, sanitizeUsers } from "../utils/sanitizeUser.js";
 import { AppError } from "../utils/error/AppError.js";
+import { logger } from "../utils/logger.js";
+import { deleteFile } from "../utils/deleteFile.js";
 import bcrypt from "bcryptjs";
+import path from "path";
 
 const {
   insertUser,
@@ -56,6 +59,9 @@ export const updateUser = async (id, payload) => {
   const updatedUser = await updateUserById(id, updateData);
 
   if (!updatedUser) throw new AppError("Failed to update user", 500);
+
+  const isAvatar = updateData.avatar && updateData.avatar !== user.avatar;
+  if (isAvatar && user.avatar) await deleteFile(path.basename(user.avatar));
 
   return sanitizeUser(updatedUser);
 };

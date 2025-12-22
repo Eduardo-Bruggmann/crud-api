@@ -13,7 +13,7 @@ const {
 export const createComment = async (payload) => {
   const comment = commentSchema.parse(payload);
 
-  const postExists = await getPostById(comment.postId);
+  const postExists = await getPost(comment.postId);
 
   if (!postExists) throw new AppError("Post does not exist", 404);
 

@@ -2,12 +2,23 @@ import * as authService from "../services/authService.js";
 import { errorHandler } from "../utils/error/errorHandler.js";
 import { logger } from "../utils/logger.js";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const cookieOptions = {
   httpOnly: true,
-  secure: false, // Set true if using HTTPS
-  sameSite: "strict",
-  maxAge: 1000 * 60 * 60 * 24 * 7,
-  path: "/api/auth",
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  path: "/api",
+};
+
+const accessTokenOptions = {
+  ...cookieOptions,
+  maxAge: 15 * 60 * 1000,
+};
+
+const refreshTokenOptions = {
+  ...cookieOptions,
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 export const register = async (req, res) => {
@@ -32,8 +43,9 @@ export const login = async (req, res) => {
 
     res
       .status(200)
-      .cookie("refreshToken", refreshToken, cookieOptions)
-      .json({ user, accessToken });
+      .cookie("accessToken", accessToken, accessTokenOptions)
+      .cookie("refreshToken", refreshToken, refreshTokenOptions)
+      .json({ user });
   } catch (err) {
     return errorHandler(err, res);
   }
@@ -41,13 +53,18 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    const token = req.cookies.refreshToken;
+    const refreshToken = req.cookies.refreshToken;
 
-    await authService.logout(token);
+    if (refreshToken) {
+      await authService.logout(refreshToken);
+      logger.info(`Logout: userId=${req.user.id}`);
+    }
 
-    logger.info(`Logout: userId=${req.user.id}`);
-
-    res.status(204).clearCookie("refreshToken", { path: "/api/auth" });
+    res
+      .status(204)
+      .clearCookie("accessToken", { path: "/api" })
+      .clearCookie("refreshToken", { path: "/api" })
+      .send();
   } catch (err) {
     return errorHandler(err, res);
   }
@@ -57,16 +74,19 @@ export const refreshTokens = async (req, res) => {
   try {
     const token = req.cookies.refreshToken;
 
+    if (!token) return res.status(204).send();
+
     const { user, accessToken, refreshToken } = await authService.refreshTokens(
       token
     );
 
-    logger.info(`Refresh emitted: userId=${valid.userId}`);
+    logger.info(`Refresh emitted: userId=${user.id}`);
 
     res
       .status(200)
-      .cookie("refreshToken", refreshToken, cookieOptions)
-      .json({ user, accessToken });
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken)
+      .json({ user });
   } catch (err) {
     return errorHandler(err, res);
   }

@@ -19,7 +19,7 @@ export const loginSchema = z
     username: usernameField.optional(),
     password: passwordField,
   })
-  .refine((data) => !data.email || !data.username, {
+  .refine((data) => data.email || data.username, {
     message: "Email or username is required",
   });
 

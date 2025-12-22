@@ -24,8 +24,8 @@ export const createPost = async (payload) => {
   return await insertPost(data);
 };
 
-export const getPost = (id) => {
-  const post = findPostById(id);
+export const getPost = async (id) => {
+  const post = await findPostById(id);
 
   if (!post) throw new AppError("Post not found", 404);
 
@@ -69,7 +69,7 @@ export const updatePost = async (id, payload) => {
 export const deletePost = async (id) => {
   await getPost(id);
 
-  if (commentCount({ postId: id }) > 0) {
+  if ((await commentCount({ postId: id })) > 0) {
     throw new AppError("Post has comments and cannot be deleted", 409);
   }
 

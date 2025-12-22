@@ -1,5 +1,6 @@
 import * as user from "../controllers/userController.js";
 import { generalLimiter } from "../middlewares/rateLimit.js";
+import { uploadAvatar } from "../middlewares/upload.js";
 import { protect } from "../middlewares/auth.js";
 import express from "express";
 
@@ -9,7 +10,12 @@ const router = express.Router();
 
 router.get("/users/profile", protect, getUser);
 router.get("/users/public", generalLimiter, protect, listPublicUsers);
-router.patch("/users/profile", protect, updateUser);
+router.patch(
+  "/users/profile",
+  protect,
+  uploadAvatar.single("avatar"),
+  updateUser
+);
 router.delete("/users/profile", protect, deleteUser);
 
 export default router;
