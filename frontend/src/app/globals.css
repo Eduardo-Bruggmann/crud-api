@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+/* .primary-bg {
+  @apply bg-blue-600 hover:bg-blue-700 border border-gray-200;
+}
+
+.primary-txt {
+  @apply text-[#1a1a1a];
+}
+
+.secondary-bg {
+  @apply bg-green-500;
+}
+
+.secondary-txt {
+  @apply text-[#4b5563];
+}
+
+.success-bg {
+  @apply bg-green-600;
+}
+
+.warning-bg {
+  @apply bg-amber-600;
+}
+
+.error-bg {
+  @apply bg-red-600;
+} */
