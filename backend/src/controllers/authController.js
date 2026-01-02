@@ -84,8 +84,8 @@ export const refreshTokens = async (req, res) => {
 
     res
       .status(200)
-      .cookie("accessToken", accessToken, cookieOptions)
-      .cookie("refreshToken", refreshToken)
+      .cookie("accessToken", accessToken, accessTokenOptions)
+      .cookie("refreshToken", refreshToken, refreshTokenOptions)
       .json({ user });
   } catch (err) {
     return errorHandler(err, res);
