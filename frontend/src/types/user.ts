@@ -13,4 +13,5 @@ export interface UpdateUserDTO {
   password?: string;
   confirmPassword?: string;
   avatar?: string;
+  isPrivate?: boolean;
 }

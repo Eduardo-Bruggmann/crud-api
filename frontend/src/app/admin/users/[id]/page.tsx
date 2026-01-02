@@ -114,7 +114,7 @@ export default function AdminUserDetail() {
                   src={
                     user.avatar && apiUrl
                       ? `${apiUrl}${user.avatar}`
-                      : "/default-pfp.png"
+                      : "/default-pfp.jpeg"
                   }
                   alt={`Avatar de ${user.username}`}
                   className="h-full w-full object-cover"

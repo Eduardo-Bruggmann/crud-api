@@ -202,7 +202,20 @@ export default function PostsFeed() {
                     <p className="text-xs font-semibold uppercase tracking-[0.08em] text-gray-500">
                       ID {post.id}
                     </p>
-                    <h2 className="text-lg font-semibold text-gray-900">
+                    <h2
+                      className={`text-lg font-semibold text-gray-900 ${
+                        user?.isAdmin
+                          ? "cursor-pointer hover:text-blue-700"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        user?.isAdmin
+                          ? window.location.assign(
+                              `/admin/posts/${post.id}/edit`
+                            )
+                          : undefined
+                      }
+                    >
                       {post.title}
                     </h2>
                   </div>

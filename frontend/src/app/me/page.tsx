@@ -33,7 +33,7 @@ export default function Me() {
   }
 
   const avatarUrl =
-    user.avatar && apiUrl ? `${apiUrl}${user.avatar}` : "/default-pfp.png";
+    user.avatar && apiUrl ? `${apiUrl}${user.avatar}` : "/default-pfp.jpeg";
 
   async function deleteProfile() {
     const confirmDeletion = confirm(

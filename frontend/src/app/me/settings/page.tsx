@@ -21,6 +21,14 @@ export default function Settings() {
     currentPassword: "",
   });
 
+  const [initialForm, setInitialForm] = useState({
+    username: "",
+    email: "",
+    isPrivate: false,
+  });
+
+  const [isTogglingPrivacy, setIsTogglingPrivacy] = useState(false);
+
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -36,6 +44,11 @@ export default function Settings() {
         isPrivate: fetchedUser.isPrivate,
         password: "",
         currentPassword: "",
+      });
+      setInitialForm({
+        username: fetchedUser.username,
+        email: fetchedUser.email,
+        isPrivate: fetchedUser.isPrivate,
       });
       setAvatarFile(null);
     };
@@ -54,6 +67,24 @@ export default function Settings() {
     setEditing(field);
     setForm((prev) => ({ ...prev, password: "", currentPassword: "" }));
   }
+
+  function cancelEditing() {
+    setEditing(null);
+    setForm((prev) => ({
+      ...prev,
+      ...initialForm,
+      password: "",
+      currentPassword: "",
+    }));
+  }
+
+  const isFieldDirty = (field: EditableField) => {
+    if (!field) return false;
+    if (field === "password") return form.password.trim().length > 0;
+    if (field === "username") return form.username !== initialForm.username;
+    if (field === "email") return form.email !== initialForm.email;
+    return false;
+  };
 
   async function saveField(field: EditableField) {
     if (!field) return;
@@ -80,7 +111,22 @@ export default function Settings() {
     setForm((prev) => ({ ...prev, password: "", currentPassword: "" }));
 
     const updatedUser = await getUser();
-    if (updatedUser) setUser(updatedUser);
+    if (updatedUser) {
+      setUser(updatedUser);
+      setInitialForm({
+        username: updatedUser.username,
+        email: updatedUser.email,
+        isPrivate: updatedUser.isPrivate,
+      });
+      setForm((prev) => ({
+        ...prev,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        isPrivate: updatedUser.isPrivate,
+        password: "",
+        currentPassword: "",
+      }));
+    }
   }
 
   return (
@@ -113,7 +159,7 @@ export default function Settings() {
                     src={
                       user.avatar && apiUrl
                         ? `${apiUrl}${user.avatar}`
-                        : "/default-pfp.png"
+                        : "/default-pfp.jpeg"
                     }
                     alt="Avatar"
                     className="h-full w-full object-cover"
@@ -159,8 +205,10 @@ export default function Settings() {
             value={form.username}
             onChange={(v: any) => setForm({ ...form, username: v })}
             isEditing={editing === "username"}
+            isDirty={isFieldDirty("username")}
             onEdit={() => startEditing("username")}
             onSave={() => saveField("username")}
+            onCancel={cancelEditing}
           />
 
           <FieldRow
@@ -171,8 +219,10 @@ export default function Settings() {
             value={form.email}
             onChange={(v: any) => setForm({ ...form, email: v })}
             isEditing={editing === "email"}
+            isDirty={isFieldDirty("email")}
             onEdit={() => startEditing("email")}
             onSave={() => saveField("email")}
+            onCancel={cancelEditing}
           >
             {editing === "email" && (
               <PasswordConfirm
@@ -186,11 +236,18 @@ export default function Settings() {
             label="Private profile"
             helper="When enabled, your data stops appearing publicly."
             checked={form.isPrivate}
-            disabled={editing !== "isPrivate"}
-            onChange={(v: any) => setForm({ ...form, isPrivate: v })}
-            isEditing={editing === "isPrivate"}
-            onEdit={() => startEditing("isPrivate")}
-            onSave={() => saveField("isPrivate")}
+            loading={isTogglingPrivacy}
+            onToggle={async (next: boolean) => {
+              setIsTogglingPrivacy(true);
+              try {
+                await updateUser({ isPrivate: next });
+                setForm((prev) => ({ ...prev, isPrivate: next }));
+                setInitialForm((prev) => ({ ...prev, isPrivate: next }));
+                setUser((prev) => (prev ? { ...prev, isPrivate: next } : prev));
+              } finally {
+                setIsTogglingPrivacy(false);
+              }
+            }}
           />
 
           <FieldRow
@@ -201,8 +258,10 @@ export default function Settings() {
             value={form.password}
             onChange={(v: any) => setForm({ ...form, password: v })}
             isEditing={editing === "password"}
+            isDirty={isFieldDirty("password")}
             onEdit={() => startEditing("password")}
             onSave={() => saveField("password")}
+            onCancel={cancelEditing}
           >
             {editing === "password" && (
               <PasswordConfirm
@@ -224,14 +283,16 @@ function FieldRow({
   value,
   disabled,
   isEditing,
+  isDirty,
   onChange,
   onEdit,
   onSave,
+  onCancel,
   children,
 }: any) {
   return (
     <div className="rounded-lg border border-gray-100 p-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto] sm:items-end sm:gap-6">
         <div className="flex-1">
           <label className="text-sm font-semibold text-gray-800">{label}</label>
           {helper && <p className="text-xs text-gray-500">{helper}</p>}
@@ -244,13 +305,13 @@ function FieldRow({
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 sm:self-end">
           {isEditing ? (
             <button
-              onClick={onSave}
+              onClick={isDirty ? onSave : onCancel}
               className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-green-700"
             >
-              Save
+              {isDirty ? "Save" : "Cancel"}
             </button>
           ) : (
             <button
@@ -281,49 +342,33 @@ function PasswordConfirm({ value, onChange }: any) {
   );
 }
 
-function ToggleRow({
-  label,
-  helper,
-  checked,
-  disabled,
-  isEditing,
-  onChange,
-  onEdit,
-  onSave,
-}: any) {
+function ToggleRow({ label, helper, checked, loading, onToggle }: any) {
   return (
     <div className="rounded-lg border border-gray-100 p-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-gray-800">{label}</p>
           {helper && <p className="text-xs text-gray-500">{helper}</p>}
         </div>
         <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              className="h-4 w-4"
-              checked={checked}
-              disabled={disabled}
-              onChange={(e) => onChange(e.target.checked)}
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => onToggle(!checked)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition shadow-sm disabled:opacity-60 ${
+              checked ? "bg-blue-600" : "bg-gray-300"
+            }`}
+            aria-pressed={checked}
+          >
+            <span
+              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                checked ? "translate-x-5" : "translate-x-1"
+              }`}
             />
+          </button>
+          <span className="text-sm font-medium text-gray-700">
             {checked ? "Enabled" : "Disabled"}
-          </label>
-          {isEditing ? (
-            <button
-              onClick={onSave}
-              className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-green-700"
-            >
-              Save
-            </button>
-          ) : (
-            <button
-              onClick={onEdit}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700"
-            >
-              Edit
-            </button>
-          )}
+          </span>
         </div>
       </div>
     </div>

@@ -77,12 +77,12 @@ export default function Home() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 overflow-hidden rounded-full border border-gray-200 bg-white">
+                  <div className="h-12 w-13 overflow-hidden rounded-full border border-gray-200 bg-white">
                     <img
                       src={
                         u.avatar && apiUrl
                           ? `${apiUrl}${u.avatar}`
-                          : "/default-pfp.png"
+                          : "/default-pfp.jpeg"
                       }
                       alt={`Avatar de ${u.username}`}
                       className="h-full w-full object-cover"

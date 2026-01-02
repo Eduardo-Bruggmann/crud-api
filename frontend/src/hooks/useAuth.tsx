@@ -52,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return null;
     } catch (err: any) {
       setUser(null);
-      setError(err.message || "Failed to refresh session");
       return null;
     } finally {
       setInitialized(true);
@@ -70,7 +69,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const createdUser = await authService.register(data);
-      setUser(createdUser);
       return createdUser;
     } catch (err: any) {
       setError(err.message || "Registration failed");
